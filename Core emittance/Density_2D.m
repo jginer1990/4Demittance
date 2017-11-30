@@ -55,7 +55,7 @@ Scov(2,2)=sum(Int(:).*(Xp(:)-r0(2)).^2) ;
 Scov(1,2)=sum(Int(:).*(X(:)-r0(1)).*(Xp(:)-r0(2))) ; Scov(2,1)=Scov(1,2);
 
 % figure(1086); clf
-imagesc(X_vec/1e-3,Xp_vec/1e-3,Int); xlabel('x [mm]'); ylabel('xp [mrad]'); set(gca,'ydir','normal')
+imagesc(X_vec/1e-3,Xp_vec/1e-3,Int'); xlabel('x [mm]'); ylabel('xp [mrad]'); set(gca,'ydir','normal')
 
 phi=1/2*atand(2*Scov(1,2)/(Scov(1,1)-Scov(2,2)));
 

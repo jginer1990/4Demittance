@@ -2,8 +2,8 @@ function [e4Dcore, em, fraction] = core4D_distr(r_4D,S_4D,Int)
 
 global gamma beta
 
-maxfrac = .4; % maximum fraction of charge to make distrubution profile
-N0=1000; step=100000; % start and resolution of the profile
+maxfrac = .9; % maximum fraction of charge to make distrubution profile
+N0=100; step=100; % start and resolution of the profile
 
 invS_4D=inv(S_4D);
 
@@ -27,7 +27,7 @@ while cumInt0(k)<maxfrac
     em(i) = gamma*beta*sqrt( abs( det( cov(r_4D_sorted(1:k,:)) ) )  );
     fraction(i) = cumInt0(k);
     k=k+step; i=i+1; 
-    display([num2str(k/numel(Int)/maxfrac*100,'%.2f') '%'])
+    display([num2str(cumInt0(k)/cumInt0(end)/maxfrac*100,'%.2f') '%'])
 end
 
 % Plot in figure
@@ -35,7 +35,7 @@ end
 np=fraction;
 Vn=em;
 plot(Vn,np,'b.'); ylim([0 1]); xlim([0 Vn(end)])
-xlabel('\epsilon^{4D}_{subset} [m rad]');
+xlabel('\epsilon^{4D}_{subset} [m^2 rad^2]');
 ylabel('Fraction charge')
 set(gca,'fontsize',12)
 

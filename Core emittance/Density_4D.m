@@ -88,12 +88,12 @@ Fxyp=sum(sum(Int,2),3); Fxyp=squeeze(Fxyp);
 Fxpy=sum(sum(Int,1),4); Fxpy=squeeze(Fxpy);
 Fxpyp=sum(sum(Int,1),3); Fxpyp=squeeze(Fxpyp);
 
-subplot(321); imagesc(X_vec/1e-3,Xp_vec/1e-3,Fxxp); xlabel('x [mm]'); ylabel('xp [mrad]'); set(gca,'ydir','normal')
-subplot(322); imagesc(Y_vec/1e-3,Yp_vec/1e-3,Fyyp); xlabel('y [mm]'); ylabel('yp [mrad]'); set(gca,'ydir','normal')
-subplot(323); imagesc(X_vec/1e-3,Y_vec/1e-3,Fxy); xlabel('x [mm]'); ylabel('y [m]'); set(gca,'ydir','normal')
-subplot(324); imagesc(X_vec/1e-3,Yp_vec/1e-3,Fxyp); xlabel('x [mm]'); ylabel('yp [mrad]'); set(gca,'ydir','normal')
-subplot(325); imagesc(Xp_vec/1e-3,Y_vec/1e-3,Fxpy); xlabel('xp [mrad]'); ylabel('y [mm]'); set(gca,'ydir','normal')
-subplot(326); imagesc(Xp_vec/1e-3,Yp_vec/1e-3,Fxpyp); xlabel('xp [mrad]'); ylabel('yp [mrad]'); set(gca,'ydir','normal')
+subplot(321); imagesc(X_vec/1e-3,Xp_vec/1e-3,Fxxp'); xlabel('x [mm]'); ylabel('xp [mrad]'); set(gca,'ydir','normal')
+subplot(322); imagesc(Y_vec/1e-3,Yp_vec/1e-3,Fyyp'); xlabel('y [mm]'); ylabel('yp [mrad]'); set(gca,'ydir','normal')
+subplot(323); imagesc(X_vec/1e-3,Y_vec/1e-3,Fxy'); xlabel('x [mm]'); ylabel('y [m]'); set(gca,'ydir','normal')
+subplot(324); imagesc(X_vec/1e-3,Yp_vec/1e-3,Fxyp'); xlabel('x [mm]'); ylabel('yp [mrad]'); set(gca,'ydir','normal')
+subplot(325); imagesc(Xp_vec/1e-3,Y_vec/1e-3,Fxpy'); xlabel('xp [mrad]'); ylabel('y [mm]'); set(gca,'ydir','normal')
+subplot(326); imagesc(Xp_vec/1e-3,Yp_vec/1e-3,Fxpyp'); xlabel('xp [mrad]'); ylabel('yp [mrad]'); set(gca,'ydir','normal')
 
 
 dist={Fxxp,Fyyp,Fxy,Fxyp,Fxpy,Fxpyp};
