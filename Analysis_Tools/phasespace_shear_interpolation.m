@@ -1,3 +1,33 @@
+function [S_interp] = phasespace_shear_interpolation(X,Y,info)
+%PHASESPACE_SHEAR_INTERPOLATION Find beam matrix by interpolation
+
+xb = info.xb;
+yb = info.yb;
+ybc = info.ybc;
+xg = info.xg;
+yg = info.yg;
+x0 = info.x0;
+y0 = info.y0;
+x0c = info.x0c;
+y0c = info.y0c;
+xp0 = info.xp0;
+yp0 = info.yp0;
+xp0c = info.xp0c;
+yp0c  = info.yp0c;
+xp = info.xp;
+yp = info.yp;
+xbc = info.xbc;
+ybc = info.ybc;
+xcen = info.xcen;
+ycen = info.ycen;
+xpcen = info.xpcen;
+ypcen = info.ypcen;
+sigmaxp = info.sigmaxp;
+sigmayp = info.sigmayp;
+intx = info.intx;
+inty = info.inty;
+intcen = info.intcen;
+
 S_interp =zeros(4);
 
 X_interp = min(X(1,:)):1:max(X(1,:));

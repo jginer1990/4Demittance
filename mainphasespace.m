@@ -6,7 +6,7 @@
 clc;
 clear all;
 %close all;
-warning off;
+warning on;
 
 addpath('./Analysis_Tools/')
 

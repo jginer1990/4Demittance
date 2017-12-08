@@ -1,209 +1,5 @@
-
-%% Determines 4D phase space
-rhon = A;
-Xn = X;
-Yn = Y;
-
-[X,Y]=meshgrid(1:size(rhon,2),1:size(rhon,1));
-X0px=sum(rhon(:).*X(:))/sum(rhon(:));
-Y0px=sum(rhon(:).*Y(:))/sum(rhon(:));
-
-%% Find angles using Radon transform
-% try
-%     theta = 1:220;
-%     [Rad,xp] = radon(rhon,theta);
-%     xpFilt = xp(xp>-100&xp<100);
-%     RadFilt = Rad(xp>-100&xp<100,:); %RadFilt(RadFilt<0)=0;
-%     % figure(91); imagesc(theta,xpFilt,RadFilt); set(gca,'YDir','normal')
-%     fcon=max(RadFilt)-min(RadFilt);
-%     % figure(92); plot(theta,fcon)
-%     [radpeaks, radlocstheta]= findpeaks(fcon,'MinPeakDistance',30);
-%     [sortedValues, sortedIndices] = sort(radpeaks, 'descend');
-%     radlocsthetaSorted = radlocstheta(sortedIndices);
-%     if 180-abs(radlocsthetaSorted(1)-radlocsthetaSorted(2))<10
-%         distance(1) = min(radlocsthetaSorted(1)-theta(1),theta(end)-radlocsthetaSorted(1));
-%         distance(2) = min(radlocsthetaSorted(2)-theta(1),theta(end)-radlocsthetaSorted(2));
-%         [~,i]= max(distance); twoangles(1)=radlocsthetaSorted(i);
-%         twoangles(2)=radlocsthetaSorted(3);
-%     else
-%         twoangles=radlocsthetaSorted(1:2);
-%     end
-%     
-%     for i=1:2
-%         range= twoangles(i)-5:twoangles(i)+5;
-%         par= polyfit(range,fcon(range),2); twoangles_fit(i)=-par(2)/2/par(1);
-%     end
-%     
-%     angle2 = twoangles_fit(twoangles_fit>=45&twoangles_fit<135);
-%     angle1 = twoangles_fit(twoangles_fit~=angle2);
-%     S1 = -tand(angle1);
-%     S2 = tand(angle2-90);
-%     
-%     Asheared = shear_image(X,Y,rhon,S1,S2,X0px,Y0px);
-%     figure(2)
-%     imagesc(Asheared)
-%     set(gca,'YDir','normal')
-%     
-%     errorshear = false;
-% catch
-%     errorshear = true;
-%     display('!Radon transformation failed.')
-% end
-
-%% Find angles with 2D-Fourier transform
-
-shear_fourier_v2; 
-
-
-%% Shear image manually
-if errorshear
-    manual = 1;
-else
-    manual = 0;%input('*Find angles manually? (0 or 1): ');
-end 
-if manual
-    figure(3)
-    imagesc(rhon)
-    set(gca,'YDir','normal')
-    
-    disp('Trace VERTICAL bars')
-    [x1,y1]=ginput(1);
-    hold on;
-    plot(x1,y1,'rx')
-    [x2,y2]=ginput(1);
-    plot(x2,y2,'rx')
-    plot([x1 x2],[y1 y2],'r-')
-    disp('Trace HORIZONTAL bars')
-    [x3,y3]=ginput(1);
-    hold on;
-    plot(x3,y3,'mx')
-    [x4,y4]=ginput(1);
-    plot(x4,y4,'mx')
-    plot([x3 x4],[y3 y4],'m-')
-    drawnow
-    
-    if abs(atand((y1-y2)/(x1-x2)))>abs(atand((y4-y3)/(x4-x3)))
-        S1 = -(x1-x2)/(y1-y2);
-        S2 = -(y4-y3)/(x4-x3);
-    else
-        S2 = -(y1-y2)/(x1-x2);
-        S1 = -(x4-x3)/(y4-y3);
-    end
-    
-    Asheared = shear_image(X,Y,rhon,S1,S2,X0px,Y0px);
-    figure(2)
-    imagesc(Asheared)
-    set(gca,'YDir','normal')
-elseif errorshear
-    Asheared = rhon;
-    S1 = 0; S2 = 0;
-end
-
-%% Project onto x and y axes
-
-intenx = sum(Asheared);
-intenx = intenx/max(intenx);
-inteny = sum(Asheared,2);
-inteny = inteny/max(inteny);
-
-%% Determine trough locations
-
-intenxsmooth = sgolayfilt(intenx,7,31);
-intenysmooth = sgolayfilt(inteny,7,31);
-[peaksx, locspeaksx]= findpeaks(intenxsmooth, 'minpeakdistance', minpeakdistance,'minpeakheight', minpeakheight_x);
-[peaksy, locspeaksy]= findpeaks(intenysmooth', 'minpeakdistance', minpeakdistance,'minpeakheight', minpeakheight_y);
-
-locsx=locspeaksx(1:(end-1))/2+locspeaksx(2:end)/2; 
-locsx=round([locspeaksx(1)-(locsx(1)-locspeaksx(1)) locsx locspeaksx(end)+(locspeaksx(end)-locsx(end))]);
-if locsx(1)<1; locsx(1)=[]; end;
-if locsx(end)>length(intenx); locsx(end)=[]; end;
-locsy=locspeaksy(1:(end-1))/2+locspeaksy(2:end)/2; 
-locsy=round([locspeaksy(1)-(locsy(1)-locspeaksy(1)) locsy locspeaksy(end)+(locspeaksy(end)-locsy(end))]);
-if locsy(1)<1; locsy(1)=[]; end;
-if locsy(end)>length(inteny); locsy(end)=[]; end;
-
-% intenxsmooth = sgolayfilt(intenx,7,61);
-% intenysmooth = sgolayfilt(inteny,7,61);
-% [minsx, locsx]= findpeaks(-intenxsmooth, 'minpeakdistance', minpeakdistance,'minpeakheight', maxtroughheight_x);
-% [minsy, locsy]= findpeaks(-intenysmooth', 'minpeakdistance', minpeakdistance,'minpeakheight', maxtroughheight_y);
-
-% idx = zeros(size(locsx,2),1);
-% idy = zeros(size(locsy,2),1);
-% idx(1) =0;
-% idx(end) = 0;
-% idy(1) = 0;
-% idy(end) = 0;
-% totcounts = sum(intenx);
-% 
-% for j = 2:size(locsx,2)-1
-%     if (sum(intenx(locsx(j):locsx(j+1))) < threshint*totcounts) | abs(locsx(j+1)-locsx(j))>maxpeakdistance
-%         idx(j) = 0;
-%     else
-%         idx(j) = 1;
-%         jlast=j+1;
-%     end
-% end
-% idx(jlast) = 1;
-%
-% totcounts = sum(inteny);
-% for j = 2:size(locsy,2)-1
-%     if (sum(inteny(locsy(j):locsy(j+1))) < threshint*totcounts) | abs(locsy(j+1)-locsy(j))>maxpeakdistance
-%         idy(j) = 0;
-%     else
-%         idy(j) = 1;
-%         jlast=j+1;
-%     end
-% end
-% idy(jlast) =1;
-% 
-% peaksx(~idx) = [];
-% locsx(~idx) = [];
-% peaksy(~idy) = [];
-% locsy(~idy) = [];
-
-figure(9); clf
-subplot(211); plot(1:length(intenx),intenx,'g-',1:length(intenxsmooth),intenxsmooth,'b-'); xlabel('x[px]'); ylabel('Projected intensity');
-hold on; plot(locspeaksx,peaksx,'r^',locsx,zeros(size(locsx)),'rv'); hold on; plot([1 length(intenxsmooth)], minpeakheight_x*[1 1],'r-'); hold off
-subplot(212); plot(1:length(inteny),inteny,'g-',1:length(intenysmooth),intenysmooth,'b-'); xlabel('y[px]'); ylabel('Projected intensity');
-hold on; plot(locspeaksy,peaksy,'r^',locsy,zeros(size(locsy)),'rv'); hold on; plot([1 length(intenysmooth)], minpeakheight_y*[1 1],'r-'); hold off
-    
-% Plot divided screen image
-figure(2)
-set(gcf,'Name','Screen sheared image')
-imagesc(Asheared); axis('xy')
-siz = size(Asheared);
-hold on
-for ii=1:length(locsx)
-    plot(locsx(ii)*[1 1], [1 siz(1)], 'y'); 
-end
-
-for ii=1:length(locsy)
-    plot([1 siz(2)],locsy(ii)*[1 1], 'y');
-end
-hold off
-
-if length(locsx)<3 || length(locsy)<3
-    error('Not enough troughs in data.')
-end
-
-%% Undo shear in Locsx,Locsy
-
-[Locsx_sh,Locsy_sh] = meshgrid(locsx,locsy);
-
-Locsx=X0px+1/(1-S1*S2)*((Locsx_sh-X0px) -S1*(Locsy_sh-Y0px));
-Locsy=Y0px+1/(1-S1*S2)*(-S2*(Locsx_sh-X0px) +(Locsy_sh-Y0px));
-
-figure(99); clf
-imagesc(rhon); 
-set(gcf,'Name','Screen image')
-set(gca,'YDir','normal')
-hold on
-for i=1:size(Locsx,1)
-    plot([Locsx(i,1) Locsx(i,end)],[Locsy(i,1) Locsy(i,end)],'y-')
-end
-for i=1:size(Locsx,2)
-    plot([Locsx(1,i) Locsx(end,i)],[Locsy(1,i) Locsy(end,i)],'y-')
-end
+function [S,info] = phasespace_shear_PP(rhon,X,Y,Xn,Yn,X0px,Y0px,S1,S2,mask_prop,locsx,locsy)
+%PHASESPACE_SHEAR_PP analyse image and compute parameters
 
 
 %% Determine beamlets centroids and rms ellipse parameters
@@ -279,7 +75,7 @@ else
     end
     h2= surf(X,Y,intfit); set(h2, 'edgecolor','r', 'facecolor','none')
 end
-view(-30,45); zlim([0 max(intfit(:))]); xlim([min(Locsx(:)) max(Locsx(:))]); ylim([min(Locsy(:)) max(Locsy(:))]); 
+view(-30,45); zlim([0 max(intfit(:))]); xlim([min(locsx(:)) max(locsx(:))]); ylim([min(locsy(:)) max(locsy(:))]); 
 xlabel('x [px]'); ylabel('y [px]'); zlabel('intensity')
 
 
@@ -290,18 +86,18 @@ yvec = Yn(:, 1);
 mmppx =  mean(diff(xvec)); % meter per px. (Xn in [m])
 mmppy =  mean(diff(yvec));
 
-xg = repmat((1:size(xb,2))*gridSpacing,size(xb,1),1); % this gives the positions of the bars at the grid intersections [m].
-yg = repmat((1:size(yb,1))*gridSpacing,size(yb,2),1)';
+xg = repmat((1:size(xb,2))*mask_prop.gridSpacing,size(xb,1),1); % this gives the positions of the bars at the grid intersections [m].
+yg = repmat((1:size(yb,1))*mask_prop.gridSpacing,size(yb,2),1)';
 
 xs = interp1(1:length(xvec), xvec, xb,'linear','extrap'); % "xs, ys" will be used to compute x' and y' (xp and yp) [m]
 ys = interp1(1:length(yvec), yvec, yb,'linear','extrap'); % find the positions [m] of the bar centers at the screen.
 
-xp = (xs-xg)/driftLength; %convert to angles.
-yp = (ys-yg)/driftLength;
+xp = (xs-xg)/mask_prop.driftLength; %convert to angles.
+yp = (ys-yg)/mask_prop.driftLength;
 
-sigmaxp = sx*mmppx/driftLength; % convert to [m]
-sigmayp = sy*mmppy/driftLength;
-sigmaxpyp = sxy*mmppx*mmppy/driftLength^2;
+sigmaxp = sx*mmppx/mask_prop.driftLength; % convert to [m]
+sigmayp = sy*mmppy/mask_prop.driftLength;
+sigmaxpyp = sxy*mmppx*mmppy/mask_prop.driftLength^2;
 
 
 %%  Compute moments
@@ -332,8 +128,6 @@ S(2,4) = sum(sum(((xp-xp0).*(yp-yp0)+sigmaxpyp) .* int))./sum(sum(int));
     S24_centroids= sum(sum(((xp-xp0).*(yp-yp0)) .* int))./sum(sum(int));
     S24_sigmas= sum(sum((sigmaxpyp) .* int))./sum(sum(int));
 
-% Interpolate vertex values from midpoint values
-
 % Symmetrize the beam matrix
 S(2,1) = S(1,2);
 S(3,1) = S(1,3);
@@ -342,11 +136,8 @@ S(3,2) = S(2,3);
 S(4,2) = S(2,4);
 S(4,3) = S(3,4);
 
-display('*Success')
-% S
-
 % Struct with all information of analysis
-info.target=target;
+info.target='PP';
 info.xb=xb;
 info.yb=yb;
 info.sigmaxp=sigmaxp;
@@ -358,6 +149,10 @@ info.xs=xs;
 info.ys=ys;
 info.xp=xp;
 info.yp=yp;
+info.x0=x0;
+info.y0=y0;
+info.xp0=xp0;
+info.yp0=yp0;
 info.int=int;
 info.S=S;
 info.S22_centroids=S22_centroids;
@@ -366,3 +161,7 @@ info.S44_centroids=S44_centroids;
 info.S44_sigmas=S44_sigmas;
 info.S24_centroids=S24_centroids;
 info.S24_sigmas=S24_sigmas;
+
+display('*Success')
+
+end

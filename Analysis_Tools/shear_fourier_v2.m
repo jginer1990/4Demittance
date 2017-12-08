@@ -1,4 +1,6 @@
-try
+function [S1,S2] = shear_fourier_v2(rhon)
+%SHEAR_FOURIER_V2 Use 2D Fourier transform to find shear factors of image
+
     Afft=abs(fftshift(fft2(rhon))); %Afft = Afft/max(Afft(:));
     figure(91); clf; set(gcf,'Name','2D Fourier transform')
     imagesc(Afft); colormap('parula'); colorbar;
@@ -24,14 +26,6 @@ try
     [~,ver]=sort(abs(col-colcen)); ver=ver(1:min(7,length(ver))); verx=col(ver); very=row(ver); 
     pp=polyfit(very,verx,1); plot(polyval(pp,[min(very) max(very)]),[min(very) max(very)],'y-'); S2=pp(1);
     drawnow;
-    Asheared = shear_image(X,Y,rhon,S1,S2,X0px,Y0px);
-    
-    figure(2)
-    imagesc(Asheared)
-    set(gca,'YDir','normal')
-    
-    errorshear = false;
-catch
-    errorshear = true;
-    display('!Shear image with Fourier method failed.')
+
+
 end

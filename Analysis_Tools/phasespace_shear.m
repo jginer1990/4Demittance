@@ -1,5 +1,9 @@
+function [S,info] = phasespace_shear_PP(rhon,X,Y,Xn,Yn,X0px,Y0px,S1,S2,mask_prop,locsx,locsy)
+%PHASESPACE_SHEAR analyse image and compute parameters
+
 
 %% Determines 4D phase space
+
 rhon = A;
 Xn = X;
 Yn = Y;
