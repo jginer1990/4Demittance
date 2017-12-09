@@ -1,5 +1,5 @@
-function [S1,S2] = shear_fourier(rhon)
-%SHEAR_FOURIER Use 2D Fourier transform to find shear factors of image
+function [S1,S2] = shear_fourier_v1(rhon)
+%SHEAR_FOURIER_V1 Use 2D Fourier transform to find shear factors of image
 
 Afft=abs(fftshift(fft2(rhon))); %Afft = Afft/max(Afft(:));
 figure(91); clf; set(gcf,'Name','2D Fourier transform')

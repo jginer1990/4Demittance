@@ -58,7 +58,7 @@ for ifile=1:length(files)
 
         try
             if strcmp(target,'TEM')
-                [S1,S2] = shear_fourier(A);
+                [S1,S2] = shear_fourier_v1(A);
             elseif strcmp(target,'PP')
                 [S1,S2] = shear_fourier_v2(A);
             end
@@ -73,15 +73,15 @@ for ifile=1:length(files)
             [Locsx_sh,Locsy_sh] = meshgrid(locsx_sh,locsy_sh);
             [Locsx,Locsy] = undo_shear(Locsx_sh,Locsy_sh,X0px,Y0px,S1,S2);
             plot_screen_divided(A,Locsx,Locsy);
-            [S,info] = phasespace_shear_TEM(Asheared,A,X,Y,locsx_sh,locsy_sh,Locsx,Locsy,minsx,minsy,mask_prop,analysis);
-            [S_interp] = phasespace_shear_interpolation(Xp,Yp,info);
+            [S,info] = phasespace_TEM(A,X,Y,locsx_sh,locsy_sh,Locsx,Locsy,minsx,minsy,mask_prop,analysis);
+            [S_interp] = interpolation_TEM(Xp,Yp,info);
         elseif strcmp(target,'PP')
             [locsx_sh,locsy_sh] = splitimage_PP(Asheared,analysis);
             [Locsx_sh,Locsy_sh] = meshgrid(locsx_sh,locsy_sh);
             [Locsx,Locsy] = undo_shear(Locsx_sh,Locsy_sh,X0px,Y0px,S1,S2);
             plot_screen_divided(A,Locsx,Locsy);
-            [S,info] = phasespace_shear_PP(A,Xp,Yp,X,Y,X0px,Y0px,S1,S2,mask_prop,locsx_sh,locsy_sh);
-            [S_interp] = phasespace_shear_interpolation_PP(Xp,Yp,info);
+            [S,info] = phasespace_PP(A,Xp,Yp,X,Y,X0px,Y0px,S1,S2,mask_prop,locsx_sh,locsy_sh);
+            [S_interp] = interpolation_PP(Xp,Yp,info);
         end
 
         [ex,ey,e1,e2]=Emittance_2D_4D(S);

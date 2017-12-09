@@ -1,5 +1,5 @@
-function [S,info] = phasespace_shear_PP(rhon,X,Y,Xn,Yn,X0px,Y0px,S1,S2,mask_prop,locsx,locsy)
-%PHASESPACE_SHEAR_PP analyse image and compute parameters
+function [S,info] = phasespace_PP(rhon,X,Y,Xn,Yn,X0px,Y0px,S1,S2,mask_prop,locsx,locsy)
+%PHASESPACE_PP analyse image and compute parameters
 
 
 %% Determine beamlets centroids and rms ellipse parameters

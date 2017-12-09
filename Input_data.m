@@ -27,7 +27,7 @@ keywords = {'TEM300_ S1_1.24_S2_0.49_counts_12e4','tif'}; target = 'TEM';
 % keywords = {'PepperPotCu300_ S1_1.24_S2_0.49_counts_6p7e4','36.tif'}; target = 'PP';
 % keywords = {'PepperPotCu300_ S1_1.24_S2_0.49_counts_12e4','.tif'}; target = 'PP';
 
-% file1 = 'TEM300_ S1_1.24_S2_0.49_counts_12e4 2017 November 03 11_52_29 69.tif'; target = 'TEM'; %Only for a single image
+% keywords = {'TEM300_ S1_1.24_S2_0.49_counts_12e4 2017 November 03 11_52_29 69.tif'}; target = 'TEM'; %Only for a single image
 
 %% Setup parameters (grid+screen)
 

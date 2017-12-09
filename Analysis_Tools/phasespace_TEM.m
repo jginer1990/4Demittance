@@ -1,5 +1,5 @@
-function [S,info] = phasespace_shear_TEM(Asheared,rhon,Xn,Yn,locsx,locsy,Locsx,Locsy,minsx,minsy,mask_prop,analysis)
-%PHASESPACE_SHEAR_TEM analyse image and compute parameters
+function [S,info] = phasespace_TEM(rhon,Xn,Yn,locsx,locsy,Locsx,Locsy,minsx,minsy,mask_prop,analysis)
+%PHASESPACE_TEM analyse image and compute parameters
 
 avpeaksepx = mean(mean(diff(Locsx,1,2)));
 avpeaksepy = mean(mean(diff(Locsy,1,1)));
@@ -13,7 +13,7 @@ xpos = locsx;
 %% Loop over y widths to determine parameters in x
 xb=zeros(length(ypos)-1,length(xpos)); sx=xb; intx=xb; ybc=xb;
 for j=1:length(ypos)-1; % Loop over y
-    intenx = sum(Asheared(ypos(j):ypos(j+1),:)); % Select intensity values between two horizontal bars
+    intenx = sum(rhon(ypos(j):ypos(j+1),:)); % Select intensity values between two horizontal bars
 %    intenx = intenx/max(intenx); % Normalize intensity
 
     %% Plot intensity
@@ -47,7 +47,7 @@ end
 %% Loop over x widths to determine parameters in y
 yb=zeros(length(ypos),length(xpos)-1); sy=yb; inty=yb; xbc=yb;
 for j=1:length(xpos)-1; % Loop over x
-    temp = Asheared(:,xpos(j):xpos(j+1));
+    temp = rhon(:,xpos(j):xpos(j+1));
     inteny = sum(temp,2);
     %% Plot intensity
     figure(200)
