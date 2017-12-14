@@ -73,7 +73,8 @@ for ifile=1:length(files)
             [Locsx_sh,Locsy_sh] = meshgrid(locsx_sh,locsy_sh);
             [Locsx,Locsy] = undo_shear(Locsx_sh,Locsy_sh,X0px,Y0px,S1,S2);
             plot_screen_divided(A,Locsx,Locsy);
-            [S,info] = phasespace_TEM(A,X,Y,locsx_sh,locsy_sh,Locsx,Locsy,minsx,minsy,mask_prop,analysis);
+            [xg,yg,xb,yb,xs,ys,xbcen,ybcen,xbc,ybc,xp,yp,intx,inty,sigmaxp,sigmayp] = phasespace_TEM(A,X,Y,locsx_sh,locsy_sh,Locsx,Locsy,mask_prop,analysis);
+            [S,info] = beammatrix_TEM(xg,yg,xb,yb,xs,ys,xbcen,ybcen,xbc,ybc,xp,yp,intx,inty,sigmaxp,sigmayp);
             [S_interp] = interpolation_TEM(Xp,Yp,info);
         elseif strcmp(target,'PP')
             [locsx_sh,locsy_sh] = splitimage_PP(Asheared,analysis);
