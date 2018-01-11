@@ -1,6 +1,13 @@
 function [locsx,locsy,minsx,minsy] = splitimage_TEM(Asheared,analysis)
 %SPLITIMAGE_TEM Finds peaks and then splits image into sections around beamlets for TEM grid analysis
 
+if(isfield(analysis,'splitsmoothparam'))
+    sp = analysis.splitsmoothparam;
+else
+    sp = 61;
+end
+
+
 %% Project onto x and y axes
 
 intenx = sum(Asheared);
@@ -10,8 +17,9 @@ inteny = inteny/max(inteny);
 
 %% Determine trough locations
 
-intenxsmooth = sgolayfilt(intenx,7,61);
-intenysmooth = sgolayfilt(inteny,7,61);
+
+intenxsmooth = sgolayfilt(intenx,7,sp);
+intenysmooth = sgolayfilt(inteny,7,sp);
 [minsx, locsx]= findpeaks(-intenxsmooth, 'minpeakdistance', analysis.minpeakdistance,'minpeakheight', analysis.maxtroughheight_x);
 [minsy, locsy]= findpeaks(-intenysmooth', 'minpeakdistance', analysis.minpeakdistance,'minpeakheight', analysis.maxtroughheight_y);
 
@@ -49,12 +57,13 @@ locsx(~idx) = [];
 minsy(~idy) = [];
 locsy(~idy) = [];
 
-figure(9); clf
+figure(92); clf
 subplot(211); plot(1:length(intenx),-intenx,'g-',1:length(intenxsmooth),-intenxsmooth,'b-'); xlabel('x[px]'); ylabel('Projected intensity');
 hold on; plot(locsx,minsx,'r^'); hold on; plot([1 length(intenxsmooth)], analysis.maxtroughheight_x*[1 1],'r-'); hold off
 subplot(212); plot(1:length(inteny),-inteny,'g-',1:length(intenysmooth),-intenysmooth,'b-'); xlabel('y[px]'); ylabel('Projected intensity');
 hold on; plot(locsy,minsy,'r^'); hold on; plot([1 length(intenysmooth)], analysis.maxtroughheight_y*[1 1],'r-'); hold off
-    
+
+
 % Plot divided screen image
 figure(2)
 set(gcf,'Name','Screen sheared image')
@@ -62,12 +71,14 @@ imagesc(Asheared); axis('xy')
 siz = size(Asheared);
 hold on
 for ii=1:length(minsx)
-    plot(locsx(ii)*[1 1], [1 siz(1)], 'y'); 
+    plot(locsx(ii)*[1 1], [1 siz(1)], 'y:'); 
 end
 
 for ii=1:length(minsy)
-    plot([1 siz(2)],locsy(ii)*[1 1], 'y');
+    plot([1 siz(2)],locsy(ii)*[1 1], 'y:');
 end
+plot(1:length(intenxsmooth),intenxsmooth*100,'r-')
+plot(intenysmooth*100,1:length(intenysmooth),'r-')
 hold off
 
 if length(minsx)<3 || length(minsy)<3
