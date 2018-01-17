@@ -65,7 +65,7 @@ hold on; plot(locsy,minsy,'r^'); hold on; plot([1 length(intenysmooth)], analysi
 
 
 % Plot divided screen image
-figure(2)
+figure(93)
 set(gcf,'Name','Screen sheared image')
 imagesc(Asheared); axis('xy')
 siz = size(Asheared);

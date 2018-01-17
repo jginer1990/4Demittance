@@ -1,4 +1,4 @@
-function [S_interp] = phasespace_shear_interpolation(X,Y,info)
+function [S_interp] = interpolation_TEM(X,Y,info)
 %PHASESPACE_SHEAR_INTERPOLATION Find beam matrix by interpolation
 
 xb = info.xb;

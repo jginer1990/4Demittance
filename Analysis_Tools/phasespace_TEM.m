@@ -1,4 +1,4 @@
-function [xg,yg,xb,yb,xs,ys,xbcen,ybcen,xbc,ybc,xp,yp,intx,inty,sigmaxp,sigmayp] = phasespace_TEM(rhon,Xn,Yn,locsx,locsy,Locsx,Locsy,mask_prop,analysis,sigma_initguess)
+function [xg,yg,xb,yb,xs,ys,xbcen,ybcen,xbc,ybc,xp,yp,intx,inty,sigmaxp,sigmayp] = phasespace_TEM(rhon,Xn,Yn,locsx,locsy,Locsx,Locsy,mask_prop,analysis)
 %PHASESPACE_TEM analyse image and compute parameters
 
 avpeaksepx = mean(diff(locsx));
@@ -11,20 +11,16 @@ barwidth_y_pix = round(avpeaksepy/mask_prop.pitch_to_bar_width_ratio);
 xb=zeros(length(locsy)-1,length(locsx)); sx=xb; intx=xb; ybc=xb;
 for j=1:length(locsy)-1; % Loop over y
     intenx = sum(rhon(locsy(j):locsy(j+1),:)); % Select intensity values between two horizontal bars
-%    intenx = intenx/max(intenx); % Normalize intensity
-
-    %% Plot intensity
-    figure
-    subplot(length(locsy),1,j)
-    plot(1:length(intenx), intenx); % Plot projections and troughs
-
+    f = figure;
+    figname = (['locsy = ' num2str(locsy(j))]);
+    f.Name = figname;
     %% Fit erf in x
     for i=1:length(locsx); % Loop over x
         flag = 0;
         xin=round((Locsx(j,i)+Locsx(j+1,i))/2);
         yin=round((Locsy(j,i)+Locsy(j+1,i))/2); ybc(j,i)=yin;
         regionx = xin-round(0.5*avpeaksepx):xin+round(0.5*avpeaksepx); % Define region from midpoint to midpoint in x
-        regiony = yin-round(0.3*avpeaksepy):yin+round(analysis.interval_pc/2/100*avpeaksepy); % Define region along y with 60% of the points between bars
+        regiony = yin-round(analysis.interval_pc/2/100*avpeaksepy):yin+round(analysis.interval_pc/2/100*avpeaksepy); % Define region along y with 60% of the points between bars
         regionx(regionx<1 | regionx>size(rhon,2))=[]; regiony(regiony<1 | regiony>size(rhon,1))=[];
         if any(regionx<0) || any(regionx>size(intenx,2))
             flag = 1;
@@ -46,17 +42,17 @@ yb=zeros(length(locsy),length(locsx)-1); sy=yb; inty=yb; xbc=yb;
 for j=1:length(locsx)-1; % Loop over x
     temp = rhon(:,locsx(j):locsx(j+1));
     inteny = sum(temp,2);
-    %% Plot intensity
-    figure
-    subplot(length(locsx),1,j)
-    plot(1:length(inteny), inteny); % Plot projections and troughs
+    f = figure;
+    figname = (['locsx = ' num2str(locsx(j))]);
+    f.Name = figname;
+    
     %% Fit erf in y
     for i=1:length(locsy); % Loop over y
         flag = 0;
         xin=round((Locsx(i,j)+Locsx(i,j+1))/2); xbc(i,j)=xin;
         yin=round((Locsy(i,j)+Locsy(i,j+1))/2);
         regiony = yin-round(0.5*avpeaksepy):yin+round(0.5*avpeaksepy);
-        regionx = xin-round(0.3*avpeaksepx):xin+round(analysis.interval_pc/2/100*avpeaksepx);
+        regionx = xin-round(analysis.interval_pc/2/100*avpeaksepx):xin+round(analysis.interval_pc/2/100*avpeaksepx);
         regionx(regionx<1 | regionx>size(rhon,2))=[]; regiony(regiony<1 | regiony>size(rhon,1))=[];
         if any(regiony<0) || any(regiony>size(inteny,1))
             flag = 1;
