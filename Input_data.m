@@ -21,13 +21,13 @@ global gamma beta
 
 %%
 
-folder= '\\10.0.0.49\pegasus\Pegasusdata\2017_11_03\LightField\';
+folder= '\\win.desy.de\home\danmarx\My Documents\Project\UCLA\PEPPER-POT and TEM GRID 2017-11-03\';
 % keywords = {'TEM300_ S1_1.24_S2_0.49_counts_6p7e4','52.tif'}; target = 'TEM';
-% keywords = {'TEM300_ S1_1.24_S2_0.49_counts_12e4','tif'}; target = 'TEM';
-keywords = {'PepperPotCu300_ S1_1.24_S2_0.49_counts_6p7e4','36.tif'}; target = 'PP';
+keywords = {'TEM300_ S1_1.24_S2_0.49_counts_12e4','tif'}; target = 'TEM';
+% keywords = {'PepperPotCu300_ S1_1.24_S2_0.49_counts_6p7e4','36.tif'}; target = 'PP';
 % keywords = {'PepperPotCu300_ S1_1.24_S2_0.49_counts_12e4','.tif'}; target = 'PP';
 
-% file1 = 'TEM300_ S1_1.24_S2_0.49_counts_12e4 2017 November 03 11_52_29 69.tif'; target = 'TEM'; %Only for a single image
+% keywords = {'TEM300_ S1_1.24_S2_0.49_counts_12e4 2017 November 03 11_52_47 74.tif'}; target = 'TEM'; %Only for a single image
 
 %% Setup parameters (grid+screen)
 
@@ -38,22 +38,21 @@ pxconv = 13.8e-6; % pixel size [m]  Nov 3rd
 gammabeta = 5.4*(1.71+.05); gamma=sqrt(gammabeta^2+1); % Nov 3rd
 beta = sqrt(1-1/gamma^2);
 
-gridSpacing = 85e-6; % [m]
-pitch_to_bar_width_ratio = 85/31;
-driftLength = 0.85; % [m] drift length from grid to screen
-
+mask_prop.gridSpacing = 85e-6; % [m]
+mask_prop.pitch_to_bar_width_ratio = 85/31;
+mask_prop.driftLength = 0.85; % [m] drift length from grid to screen
 
 %% Analysis parameters
 
 %maxs = 10;                       % Maximum sigma of the fitted ERFs, in pixels. Larger values will be considered garbage and thrown out.
-minpeakdistance = 30;     % In search for peaks, this is the minimum distance allowed between two bars.
-maxpeakdistance = 55;
-maxtroughheight_x = -0.65;  % This is the minimum height of a peak still considered a 'peak' (TEM grids)
-maxtroughheight_y = -0.65;  % This is the minimum height of a peak still considered a 'peak' (TEM grids)
-minpeakheight_x = 0.1;  % This is the minimum height of a peak still considered a 'peak' (PepperPot)
-minpeakheight_y = 0.1; % This is the minimum height of a peak still considered a 'peak' (PepperPot)
-threshint = 0.03; % Threshold of intensity in each beamlet (as a fraction of total intensity)
-interval_pc = 60; % interval in [%] of integration along y (x) to fit sigmaxp (sigmayp), centered at midpoint of the bar
+analysis.minpeakdistance = 30;     % In search for peaks, this is the minimum distance allowed between two bars.
+analysis.maxpeakdistance = 55;
+analysis.maxtroughheight_x = -0.65;  % This is the minimum height of a peak still considered a 'peak' (TEM grids)
+analysis.maxtroughheight_y = -0.65;  % This is the minimum height of a peak still considered a 'peak' (TEM grids)
+analysis.minpeakheight_x = 0.1;  % This is the minimum height of a peak still considered a 'peak' (PepperPot)
+analysis.minpeakheight_y = 0.1; % This is the minimum height of a peak still considered a 'peak' (PepperPot)
+analysis.threshint = 0.03; % Threshold of intensity in each beamlet (as a fraction of total intensity)
+analysis.interval_pc = 60; % interval in [%] of integration along y (x) to fit sigmaxp (sigmayp), centered at midpoint of the bar
 
 
 %% Crop settings (ellipse)

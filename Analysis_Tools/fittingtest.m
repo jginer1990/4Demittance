@@ -1,4 +1,4 @@
-function [sigma,x0,intx] = fitting(x,y,barwidth,driftLength)
+function [sigma,x0,intx] = fittingtest(x,y,barwidth,driftLength)
 
 %% Search for minimum
 [minval, ~] = min(y);
