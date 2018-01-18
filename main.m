@@ -50,7 +50,8 @@ for ifile=1:length(files)
     yvec = yvec-Y0;
     
     keep = true;%input('*Analyse this image? (0 or 1): '); %Ask user if they like the image they see.
-    
+    compute_core = true; % include computation of 2D/4D core emittance
+
     if keep
         [Xp,Yp]=meshgrid(1:size(A,2),1:size(A,1));
         X0px=sum(A(:).*Xp(:))/sum(A(:));
@@ -75,14 +76,39 @@ for ifile=1:length(files)
             plot_screen_divided(A,Locsx,Locsy);
             [xg,yg,xb,yb,xs,ys,xbcen,ybcen,xbc,ybc,xp,yp,intx,inty,sigmaxp,sigmayp] = phasespace_TEM(A,X,Y,locsx_sh,locsy_sh,Locsx,Locsy,mask_prop,analysis,sigma_initguess);
             [S,info] = beammatrix_TEM(xg,yg,xb,yb,xs,ys,xbcen,ybcen,xbc,ybc,xp,yp,intx,inty,sigmaxp,sigmayp);
-            [S_interp] = interpolation_TEM(Xp,Yp,info);
+            [S_interp,info_interp] = interpolation_TEM(Xp,Yp,info);
+            if compute_core
+                [ex2Dcore,ey2Dcore] = core2Demittance(...
+                    info_interp.xg_interp,info_interp.xp_interp,...
+                    info_interp.sigmaxp_interp,info_interp.intx_interp,...
+                    info_interp.yg_interp,info_interp.yp_interp,...
+                    info_interp.sigmayp_interp,info_interp.inty_interp);
+                e4Dcore = core4Demittance(...
+                    info_interp.xg_interp,info_interp.xp_interp,...
+                    info_interp.yg_interp,info_interp.yp_interp,...
+                    info_interp.sigmaxp_interp,info_interp.sigmayp_interp,...
+                    info_interp.sigmaxpyp_interp,sqrt(info_interp.intx_interp.*info_interp.inty_interp));
+            end
+
         elseif strcmp(target,'PP')
             [locsx_sh,locsy_sh] = splitimage_PP(Asheared,analysis);
             [Locsx_sh,Locsy_sh] = meshgrid(locsx_sh,locsy_sh);
             [Locsx,Locsy] = undo_shear(Locsx_sh,Locsy_sh,X0px,Y0px,S1,S2);
             plot_screen_divided(A,Locsx,Locsy);
             [S,info] = phasespace_PP(A,Xp,Yp,X,Y,X0px,Y0px,S1,S2,mask_prop,locsx_sh,locsy_sh);
-            [S_interp] = interpolation_PP(Xp,Yp,info);
+            [S_interp,info_interp] = interpolation_PP(Xp,Yp,info);
+            if compute_core
+                [ex2Dcore,ey2Dcore] = core2Demittance(...
+                    info_interp.xg_interp,info_interp.xp_interp,...
+                    info_interp.sigmaxp_interp,info_interp.int_interp,...
+                    info_interp.yg_interp,info_interp.yp_interp,...
+                    info_interp.sigmayp_interp,info_interp.int_interp);
+                e4Dcore = core4Demittance(...
+                    info_interp.xg_interp,info_interp.xp_interp,...
+                    info_interp.yg_interp,info_interp.yp_interp,...
+                    info_interp.sigmaxp_interp,info_interp.sigmayp_interp,...
+                    info_interp.sigmaxpyp_interp,info_interp.int_interp);
+            end
         end
         
         disp(length(locsx_sh))
@@ -120,12 +146,22 @@ for ifile=1:length(files)
             aux.e1_interp=e1_interp*gamma*beta;
             aux.e2_interp=e2_interp*gamma*beta;
             aux.charge = sum(Acrop0(:));
+            if compute_core
+                aux.ex2Dcore=ex2Dcore*gamma*beta;
+                aux.ey2Dcore=ey2Dcore*gamma*beta;
+                aux.e4Dcore=e4Dcore*(gamma*beta)^2;
+            else
+                aux.ex2Dcore=NaN;
+                aux.ey2Dcore=NaN;
+                aux.e4Dcore=NaN;
+            end
             results(ifile)= aux;
             Info(ifile)= info;
         else
             aux.file=files(ifile).name;
             aux.S=NaN(4); aux.ex=NaN; aux.ey=NaN; aux.e1=NaN; aux.e2=NaN;
             aux.S_interp=NaN(4); aux.ex_interp=NaN; aux.ey_interp=NaN; aux.e1_interp=NaN; aux.e2_interp=NaN;
+            aux.charge=NaN; aux.ex2Dcore=NaN; aux.ey2Dcore=NaN; aux.e4Dcore=NaN;
             results(ifile)= aux;
             Info(ifile)= info;
         end

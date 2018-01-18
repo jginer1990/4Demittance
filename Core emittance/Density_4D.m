@@ -48,10 +48,16 @@ syp=syp(roi);
 sxpyp=sxpyp(roi); rho=sxpyp./sxp./syp;
 int=int(roi);
 
-
-for i=1:numel(x)
+nb_sigmas = 3;
+roi_size = numel(x); progress=1;
+for i=1:roi_size
+    
+    % Filter first in x,y 
     d=abs(X-x(i)); minval=min(d(:));  ifilter=find(d(:)==minval);
     d=abs(Y(ifilter)-y(i)); minval=min(d(:)); ifilter=ifilter(d(:)==minval);
+    
+    % Filter in xp,yp in 3 sigmas.
+    ifilter= ifilter( abs(Xp(ifilter)-xp(i))<nb_sigmas*sxp(i) & abs(Yp(ifilter)-yp(i))<nb_sigmas*syp(i) );
     
     Int(ifilter) = Int(ifilter) + int(i)*dX*dY* ...
         1/(2*pi*sxp(i)*syp(i)*sqrt(1-rho(i)^2))* ...
@@ -59,7 +65,11 @@ for i=1:numel(x)
                         (Xp(ifilter)-xp(i)).^2/(sxp(i)^2)+(Yp(ifilter)-yp(i)).^2/(syp(i)^2) ...
                         -2*rho(i)*(Xp(ifilter)-xp(i)).*(Yp(ifilter)-yp(i))/(sxp(i)*syp(i)) ...
                         ) );
-    display([num2str(i/numel(x)*100) '%'])
+    if i/roi_size*100>=progress
+        display([num2str(progress) '%'])
+        progress=progress+1;
+    end
+    
 end
 
 Int=Int/sum(Int(:));
@@ -88,12 +98,12 @@ Fxyp=sum(sum(Int,2),3); Fxyp=squeeze(Fxyp);
 Fxpy=sum(sum(Int,1),4); Fxpy=squeeze(Fxpy);
 Fxpyp=sum(sum(Int,1),3); Fxpyp=squeeze(Fxpyp);
 
-subplot(321); imagesc(X_vec/1e-3,Xp_vec/1e-3,Fxxp'); xlabel('x [mm]'); ylabel('xp [mrad]'); set(gca,'ydir','normal')
-subplot(322); imagesc(Y_vec/1e-3,Yp_vec/1e-3,Fyyp'); xlabel('y [mm]'); ylabel('yp [mrad]'); set(gca,'ydir','normal')
-subplot(323); imagesc(X_vec/1e-3,Y_vec/1e-3,Fxy'); xlabel('x [mm]'); ylabel('y [m]'); set(gca,'ydir','normal')
-subplot(324); imagesc(X_vec/1e-3,Yp_vec/1e-3,Fxyp'); xlabel('x [mm]'); ylabel('yp [mrad]'); set(gca,'ydir','normal')
-subplot(325); imagesc(Xp_vec/1e-3,Y_vec/1e-3,Fxpy'); xlabel('xp [mrad]'); ylabel('y [mm]'); set(gca,'ydir','normal')
-subplot(326); imagesc(Xp_vec/1e-3,Yp_vec/1e-3,Fxpyp'); xlabel('xp [mrad]'); ylabel('yp [mrad]'); set(gca,'ydir','normal')
+subplot(321); imagesc(X_vec/1e-3,Xp_vec/1e-3,Fxxp'/max(Fxxp(:))); xlabel('x [mm]'); ylabel('xp [mrad]'); set(gca,'ydir','normal')
+subplot(322); imagesc(Y_vec/1e-3,Yp_vec/1e-3,Fyyp'/max(Fyyp(:))); xlabel('y [mm]'); ylabel('yp [mrad]'); set(gca,'ydir','normal')
+subplot(323); imagesc(X_vec/1e-3,Y_vec/1e-3,Fxy'/max(Fxy(:))); xlabel('x [mm]'); ylabel('y [m]'); set(gca,'ydir','normal')
+subplot(324); imagesc(X_vec/1e-3,Yp_vec/1e-3,Fxyp'/max(Fxyp(:))); xlabel('x [mm]'); ylabel('yp [mrad]'); set(gca,'ydir','normal')
+subplot(325); imagesc(Xp_vec/1e-3,Y_vec/1e-3,Fxpy'/max(Fxpy(:))); xlabel('xp [mrad]'); ylabel('y [mm]'); set(gca,'ydir','normal')
+subplot(326); imagesc(Xp_vec/1e-3,Yp_vec/1e-3,Fxpyp'/max(Fxpyp(:))); xlabel('xp [mrad]'); ylabel('yp [mrad]'); set(gca,'ydir','normal')
 
 
 dist={Fxxp,Fyyp,Fxy,Fxyp,Fxpy,Fxpyp};
