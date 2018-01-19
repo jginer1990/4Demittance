@@ -1,6 +1,12 @@
 function [locsx,locsy] = splitimage_PP(Asheared,analysis)
 %SPLITIMAGE_PP Finds peaks and then splits image into sections around beamlets for pepperpot analysis
 
+if(isfield(analysis,'splitsmoothparam'))
+    sp = analysis.splitsmoothparam;
+else
+    sp = 31;
+end
+
 %% Project onto x and y axes
 
 intenx = sum(Asheared);
@@ -10,8 +16,8 @@ inteny = inteny/max(inteny);
 
 %% Find peaks
 
-intenxsmooth = sgolayfilt(intenx,7,31);
-intenysmooth = sgolayfilt(inteny,7,31);
+intenxsmooth = sgolayfilt(intenx,7,sp);
+intenysmooth = sgolayfilt(inteny,7,sp);
 [peaksx, locspeaksx]= findpeaks(intenxsmooth, 'minpeakdistance', analysis.minpeakdistance,'minpeakheight', analysis.minpeakheight_x);
 [peaksy, locspeaksy]= findpeaks(intenysmooth', 'minpeakdistance', analysis.minpeakdistance,'minpeakheight', analysis.minpeakheight_y);
 
