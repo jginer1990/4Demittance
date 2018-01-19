@@ -50,7 +50,7 @@ for ifile=1:length(files)
     yvec = yvec-Y0;
     
     keep = true;%input('*Analyse this image? (0 or 1): '); %Ask user if they like the image they see.
-    compute_core = true; % include computation of 2D/4D core emittance
+    compute_core = false; % include computation of 2D/4D core emittance
 
     if keep
         [Xp,Yp]=meshgrid(1:size(A,2),1:size(A,1));
@@ -74,7 +74,7 @@ for ifile=1:length(files)
             [Locsx_sh,Locsy_sh] = meshgrid(locsx_sh,locsy_sh);
             [Locsx,Locsy] = undo_shear(Locsx_sh,Locsy_sh,X0px,Y0px,S1,S2);
             plot_screen_divided(A,Locsx,Locsy);
-            [xg,yg,xb,yb,xs,ys,xbcen,ybcen,xbc,ybc,xp,yp,intx,inty,sigmaxp,sigmayp] = phasespace_TEM(A,X,Y,locsx_sh,locsy_sh,Locsx,Locsy,mask_prop,analysis,sigma_initguess);
+            [xg,yg,xb,yb,xs,ys,xbcen,ybcen,xbc,ybc,xp,yp,intx,inty,sigmaxp,sigmayp] = phasespace_TEM(A,X,Y,locsx_sh,locsy_sh,Locsx,Locsy,mask_prop,analysis);
             [S,info] = beammatrix_TEM(xg,yg,xb,yb,xs,ys,xbcen,ybcen,xbc,ybc,xp,yp,intx,inty,sigmaxp,sigmayp);
             [S_interp,info_interp] = interpolation_TEM(Xp,Yp,info);
             if compute_core
