@@ -1,4 +1,4 @@
-function [S_interp] = phasespace_shear_interpolation_PP(X,Y,info)
+function [S_interp,info_interp] = interpolation_PP(X,Y,info)
 %PHASESPACE_SHEAR_INTERPOLATION_PP Find beam matrix by interpolation
 
 xb = info.xb;
@@ -58,5 +58,16 @@ S_interp(4,1) = S_interp(1,4);
 S_interp(3,2) = S_interp(2,3);
 S_interp(4,2) = S_interp(2,4);
 S_interp(4,3) = S_interp(3,4);
+
+
+%% Save interpolated values
+info_interp.xg_interp = xg_interp;
+info_interp.xp_interp = xp_interp;
+info_interp.yg_interp = yg_interp;
+info_interp.yp_interp = yp_interp;
+info_interp.sigmaxp_interp = sigmaxp_interp;
+info_interp.sigmayp_interp = sigmayp_interp;
+info_interp.sigmaxpyp_interp = sigmaxpyp_interp;
+info_interp.int_interp = int_interp;
 
 end

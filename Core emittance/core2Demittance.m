@@ -1,20 +1,15 @@
-%% 
+function [ex2Dcore,ey2Dcore] = core2Demittance(xg_interp,xp_interp,sigmaxp_interp,intx_interp,yg_interp,yp_interp,sigmayp_interp,inty_interp)
 % This script reconstructs the projected 2D trace space x-xp and y-yp and
 % calculates the core 2D emittance from charge distribution in the ellipse
 % area. [Jorge GN]
-% >> Run this script after 'phasespace_shear_interpolation.m'
-
-if strcmp(target,'PP')
-    intx_interp=int_interp;
-    inty_interp=int_interp;
-end
+% >> Input: use interpolated parameters from 'interpolation_PP.m' or 'interpolation_TEM.m'
 
 % Variant 1: Using correlated x-xp, y-yp
 figure(780); clf
 subplot(121);
 [Int_2Dxxp,X_2Dxxp,Xp_2Dxxp,r0_2Dxxp,S_2Dxxp] = Density_2D(xg_interp,xp_interp,sigmaxp_interp,intx_interp,[200 200]);
 subplot(122);
-[Int_2Dyyp,Y_2Dyp,Yp_2Dyyp,r0_2Dyyp,S_2Dyyp] = Density_2D(yg_interp,yp_interp,sigmayp_interp,inty_interp,[200 200]); xlabel('y [mm]'); ylabel('yp [mrad]');
+[Int_2Dyyp,Y_2Dyyp,Yp_2Dyyp,r0_2Dyyp,S_2Dyyp] = Density_2D(yg_interp,yp_interp,sigmayp_interp,inty_interp,[200 200]); xlabel('y [mm]'); ylabel('yp [mrad]');
 
 
 % Variant 2: Using uncorrelated xp and yp

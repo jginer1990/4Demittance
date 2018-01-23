@@ -28,10 +28,10 @@ for j=1:length(locsy)-1; % Loop over y
         if flag == 0
             Ixroi = sum(rhon(regiony,regionx),1);
             try
-                [sx(j,i), xb(j,i), intx(j,i)] = fitting(regionx, Ixroi, barwidth_x_pix, mask_prop.driftLength, analysis); % Fit erf of region between two peaks
+                [sx(j,i), xb(j,i), intx(j,i)] = fittingtest(regionx, Ixroi, barwidth_x_pix, mask_prop.driftLength); % Fit erf of region between two peaks
             catch
                 Ixroi = sgolayfilt(Ixroi,7,21);
-                [sx(j,i), xb(j,i), intx(j,i)] = fitting(regionx, Ixroi, barwidth_x_pix, mask_prop.driftLength, analysis); % Fit erf of region between two peaks
+                [sx(j,i), xb(j,i), intx(j,i)] = fittingtest(regionx, Ixroi, barwidth_x_pix, mask_prop.driftLength); % Fit erf of region between two peaks
             end
         end
     end
@@ -60,10 +60,10 @@ for j=1:length(locsx)-1; % Loop over x
         if flag == 0
             Iyroi = sum(rhon(regiony,regionx),2);
             try
-                [sy(i,j), yb(i,j), inty(i,j)] = fitting(regiony, Iyroi', barwidth_y_pix, mask_prop.driftLength, analysis); % Fit erf of region between two peaks.
+                [sy(i,j), yb(i,j), inty(i,j)] = fittingtest(regiony, Iyroi', barwidth_y_pix, mask_prop.driftLength); % Fit erf of region between two peaks.
             catch
                 Iyroi = sgolayfilt(Iyroi,7,21);
-                [sy(i,j), yb(i,j), inty(i,j)] = fitting(regiony, Iyroi', barwidth_y_pix, mask_prop.driftLength, analysis); % Fit erf of region between two peaks.
+                [sy(i,j), yb(i,j), inty(i,j)] = fittingtest(regiony, Iyroi', barwidth_y_pix, mask_prop.driftLength); % Fit erf of region between two peaks.
             end
         end
     end 
