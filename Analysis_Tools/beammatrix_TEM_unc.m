@@ -94,41 +94,51 @@ ex_unc = sqrt(ex_sq_var)/(2*ex);
 ey_unc = sqrt(ey_sq_var)/(2*ey);
 
 
+
+
 %% Interpolate vertex values from midpoint values
 
-clear ymid xmid intymid intxmid intxcen intycen ycen xcen
-clear ypmid xpmid ypcen xpcen
-ymid(:,2:size(yb,2)+1) = yg(:,:);
-ymid(:,1) = ymid(:,2);
-ymid(:,end+1) = ymid(:,end);
-ycen = (ymid(:,1:end-1)+ymid(:,2:end)) /2;
+xcen = zeros(size(xg,1)+1,size(xg,2));
+xcen(1,:) = xg(1,:);
+xcen(end,:) = xg(end,:);
+xcen(2:end-1,:) = (xg(1:end-1,:)+xg(2:end,:))/2;
 
-ypmid(:,2:size(yb,2)+1) = yp(:,:);
-ypmid(:,1) = ypmid(:,2);
-ypmid(:,end+1) = ypmid(:,end);
-ypcen = (ypmid(:,1:end-1)+ypmid(:,2:end)) /2;
+xpcen = zeros(size(xp,1)+1,size(xp,2));
+xpcen(1,:) = xp(1,:);
+xpcen(end,:) = xp(end,:);
+xpcen(2:end-1,:) = (xp(1:end-1,:)+xp(2:end,:))/2;
 
-intymid(:,2:size(yb,2)+1) = inty(:,:);
-intymid(:,1) = intymid(:,2);
-intymid(:,end+1) = intymid(:,end);
-intycen = (intymid(:,1:end-1)+intymid(:,2:end)) /2 .*sign(intymid(:,1:end-1).*intymid(:,2:end)); % if any is zero, make intcen=0
+xscen = zeros(size(xs,1)+1,size(xs,2));
+xscen(1,:) = xs(1,:);
+xscen(end,:) = xs(end,:);
+xscen(2:end-1,:) = (xs(1:end-1,:)+xs(2:end,:))/2;
 
-xmid(:,2:size(xb,1)+1) = xg(:,:)';
-xmid(:,1) = xmid(:,2);
-xmid(:,end+1) = xmid(:,end);
-xcen = ((xmid(:,1:end-1)+xmid(:,2:end))/2)';
+intxcen = zeros(size(intx,1)+1,size(intx,2));
+intxcen(1,:) = intx(1,:);
+intxcen(end,:) = intx(end,:);
+intxcen(2:end-1,:) = (intx(1:end-1,:)+intx(2:end,:))/2.*sign(intx(1:end-1,:)+intx(2:end,:)); % if any is zero, make intcen=0
 
-xpmid(:,2:size(xb,1)+1) = xp(:,:)';
-xpmid(:,1) = xpmid(:,2);
-xpmid(:,end+1) = xpmid(:,end);
-xpcen = ((xpmid(:,1:end-1)+xpmid(:,2:end))/2)';
+ycen = zeros(size(yg,1),size(yg,2)+1);
+ycen(:,1) = yg(:,1);
+ycen(:,end) = yg(:,end);
+ycen(:,2:end-1) = (yg(:,1:end-1)+yg(:,2:end))/2;
 
-intxmid(:,2:size(xb,1)+1) = intx(:,:)';
-intxmid(:,1) = intxmid(:,2);
-intxmid(:,end+1) = intxmid(:,end);
-intxcen = ((intxmid(:,1:end-1)+intxmid(:,2:end))/2.*sign(intxmid(:,1:end-1).*intxmid(:,2:end)))'; % if any is zero, make intcen=0
+ypcen = zeros(size(yp,1),size(yp,2)+1);
+ypcen(:,1) = yp(:,1);
+ypcen(:,end) = yp(:,end);
+ypcen(:,2:end-1) = (yp(:,1:end-1)+yp(:,2:end))/2;
 
-intcen = sqrt(intycen.*intxcen);
+yscen = zeros(size(ys,1),size(ys,2)+1);
+yscen(:,1) = ys(:,1);
+yscen(:,end) = ys(:,end);
+yscen(:,2:end-1) = (ys(:,1:end-1)+ys(:,2:end))/2;
+
+intycen = zeros(size(inty,1),size(inty,2)+1);
+intycen(:,1) = inty(:,1);
+intycen(:,end) = inty(:,end);
+intycen(:,2:end-1) = (inty(:,1:end-1)+inty(:,2:end))/2.*sign(inty(:,1:end-1)+inty(:,2:end)); % if any is zero, make intcen=0
+
+intcen = sqrt(intxcen.*intycen);
 figure(99); hold on; plot(xbcen(intcen~=0),ybcen(intcen~=0),'go'); 
 figure(199); hold on
 for ii=1:numel(intcen)
@@ -155,7 +165,101 @@ S(4,2) = S(2,4);
 S(4,3) = S(3,4);
 
 
-% Struct with all information of analysis
+%% Calculate uncertainties for coupling terms
+
+NoEle = 3;
+% Caclulate uncertainties on xcens
+NoCols = size(xs,2);
+Jxcencol = zeros(NoEle*size(xscen,1),NoEle*size(xs,1));
+
+for ii = 1:NoEle
+    Jxcencol(ii,ii) = 1;
+    Jxcencol(size(Jxcencol,1)+1-ii,size(Jxcencol,2)+1-ii) = 1;
+end
+
+for ii = NoEle+1:size(Jxcencol,2)
+    Jxcencol(ii,ii) = 0.5;
+    Jxcencol(ii,ii-3) = 0.5;
+end
+
+Jxcencell = repmat({Jxcencol},1,NoCols);
+Jxcen = blkdiag(Jxcencell{:}); % Make matrix for every column
+
+Vx_unc_cen = Jxcen*Vx_unc*Jxcen';
+
+
+% Caclulate uncertainties on ycens
+NoRows = size(ys,1);
+Jycenrow = zeros(NoEle*size(yscen,2),NoEle*size(ys,2));
+
+for ii = 1:NoEle
+    Jycenrow(ii,ii) = 1;
+    Jycenrow(size(Jycenrow,1)+1-ii,size(Jycenrow,2)+1-ii) = 1;
+end
+
+for ii = NoEle+1:size(Jycenrow,2)
+    Jycenrow(ii,ii) = 0.5;
+    Jycenrow(ii,ii-3) = 0.5;
+end
+
+Jycencell = repmat({Jycenrow},1,NoRows);
+Jycen = blkdiag(Jycencell{:}); % Make matrix for every row
+
+Vy_unc_cen = Jycen*Vy_unc*Jycen';
+
+
+% Calculate uncertainties on beam matrix elements
+
+Vx_unc_cen_nosigma = Vx_unc_cen;
+Vx_unc_cen_nosigma(2:3:end,:)=[]; % Remove sigma rows and columns from Vx_unc_cen
+Vx_unc_cen_nosigma(:,2:3:end)=[]; % Remove sigma rows and columns from Vx_unc_cen
+Vy_unc_cen_nosigma = Vy_unc_cen;
+Vy_unc_cen_nosigma(2:3:end,:)=[]; % Remove sigma rows and columns from Vy_unc_cen
+Vy_unc_cen_nosigma(:,2:3:end)=[]; % Remove sigma rows and columns from Vy_unc_cen
+
+Vx_unc_cen_long = [Vx_unc_cen_nosigma zeros(size(Vx_unc_cen_nosigma))]; % Add zeros to end of row
+Vy_unc_cen_long = [zeros(size(Vy_unc_cen_nosigma)) Vy_unc_cen_nosigma]; % Add zeros to end of row
+V_unc_cen = vertcat(Vx_unc_cen_long,Vy_unc_cen_long);
+
+% Reorder so we have x1,y1,Ix1,Iy1,x2,y2...
+order = zeros(1,length(V_unc_cen));
+order(1:2:end) = 1:length(V_unc_cen)/2;
+order(2:2:end) = length(V_unc_cen)/2+1:length(V_unc_cen);
+V_unc_cen_re = V_unc_cen(order,order);
+
+
+Jxy = zeros(4,4*length(xcen(:))); % Derivative matrix for <xy>,<x'y'>,<xy'>,<x'y> with respect to xcen(i),Ix(i),ycen(i),Iy(i)
+
+sum_intcen = sum(intcen(:));
+dIdIx = 0.5*sqrt(intycen./intxcen);
+dIdIy = 0.5*sqrt(intxcen./intycen);
+sigmaxpyp = zeros(size(dIdIx));
+
+for ii = 1:length(xcen(:))
+    Jxy(1,1+4*(ii-1)) = 0;
+    Jxy(1,2+4*(ii-1)) = 0;
+    Jxy(1,3+4*(ii-1)) = (xcen(ii)*ycen(ii)-S(1,3))/sum_intcen * dIdIx(ii);
+    Jxy(1,4+4*(ii-1)) = (xcen(ii)*ycen(ii)-S(1,3))/sum_intcen * dIdIy(ii);
+    Jxy(2,1+4*(ii-1)) = intcen(ii)*(yscen(ii)-ycen(ii))/(mask_prop.driftLength^2*sum_intcen);
+    Jxy(2,2+4*(ii-1)) = intcen(ii)*(xscen(ii)-xcen(ii))/(mask_prop.driftLength^2*sum_intcen);
+    Jxy(2,3+4*(ii-1)) = ((xscen(ii)-xcen(ii))*(yscen(ii)-ycen(ii))/mask_prop.driftLength^2 + sigmaxpyp(ii)^2 - S(2,4))/sum_intcen * dIdIx(ii);
+    Jxy(2,4+4*(ii-1)) = ((xscen(ii)-xcen(ii))*(yscen(ii)-ycen(ii))/mask_prop.driftLength^2 + sigmaxpyp(ii)^2 - S(2,4))/sum_intcen * dIdIy(ii);
+    Jxy(3,1+4*(ii-1)) = 0;
+    Jxy(3,2+4*(ii-1)) = intcen(ii)*xcen(ii)/(mask_prop.driftLength*sum_intcen);
+    Jxy(3,3+4*(ii-1)) = (xcen(ii)*(yscen(ii)-ycen(ii))/mask_prop.driftLength - S(1,4))/sum_intcen * dIdIx(ii);
+    Jxy(3,4+4*(ii-1)) = (xcen(ii)*(yscen(ii)-ycen(ii))/mask_prop.driftLength - S(1,4))/sum_intcen * dIdIy(ii);
+    Jxy(4,1+4*(ii-1)) = intcen(ii)*ycen(ii)/(mask_prop.driftLength*sum_intcen);
+    Jxy(4,2+4*(ii-1)) = 0;
+    Jxy(4,3+4*(ii-1)) = (ycen(ii)*(xscen(ii)-xcen(ii))/mask_prop.driftLength - S(2,3))/sum_intcen * dIdIx(ii);
+    Jxy(4,4+4*(ii-1)) = (ycen(ii)*(xscen(ii)-xcen(ii))/mask_prop.driftLength - S(2,3))/sum_intcen * dIdIy(ii);
+end
+
+
+covMatrix_elements_xy = Jxy*V_unc_cen_re*Jxy';
+
+
+
+%% Struct with all information of analysis
 info.target='TEM';
 info.xb=xb;
 info.ybc=ybc;
