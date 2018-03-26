@@ -34,7 +34,7 @@ modelFunerf = @(p,x) p(5)+p(4)*x+ p(3).*(-erf((x-p(1)+ barwidth/2)/(sqrt(2)*drif
 startingVals = [xminval,sqrt(sigma_initguess),max(y),gradinitguess,0]; % initial guess gfit, change if necessary.
 
 [erfcoefs,R,J,covx,MSE,ErrorModelInfo] = nlinfit(x, y, modelFunerf, startingVals); % fit
-covx = covx(1:3,1:3);
+% covx = covx(1:3,1:3);
 subplot(1,2,2);
 plot(x,y);
 hold on
@@ -42,11 +42,24 @@ plot(x,modelFunerf(erfcoefs,x),'c--');
 
 sigma = erfcoefs(2);
 x0 = erfcoefs(1);
-intx = erfcoefs(5)+erfcoefs(4)*xminval;
+intx = erfcoefs(5)+erfcoefs(4)*x0;
+
+J = [...
+    1 0 0 0 0; ...
+    0 1 0 0 0; ...
+    erfcoef(4) 0 0 erfcoef(1) 1] ;
+covx = J*covx*J';
+
 
 %% Sanity cuts
 
-if (x0<min(x) | x0>max(x) | sigma> max(x)-min(x)) | intx<0
-    x0=0;
-    intx=0;
+if (x0<min(x) | x0>max(x) | driftLength*sigma> max(x)-min(x)) | intx<0
+    x0=xminval;
+    intx=gradinitguess*xminval+baseinitguess;
+    sigma=0;
+    
+    if (x0<min(x) | x0>max(x)) | intx<0
+        x0=0;
+        intx=0;
+    end
 end
