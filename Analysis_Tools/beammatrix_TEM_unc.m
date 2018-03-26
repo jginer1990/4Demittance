@@ -1,4 +1,4 @@
-function [S,ex,ex_unc,ey,ey_unc,info] = beammatrix_TEM_unc(xg,yg,xb,yb,xs,ys,xbcen,ybcen,xbc,ybc,xp,yp,intx,inty,sigmaxp,sigmayp,covx_scaled,covy_scaled,mask_prop)
+function [S,ex,ey,info] = beammatrix_TEM_unc(xg,yg,xb,yb,xs,ys,xbcen,ybcen,xbc,ybc,xp,yp,intx,inty,sigmaxp,sigmayp,covx_scaled,covy_scaled,mask_prop)
 %BEAMMATRIX_TEM_UNC computes moments and beam matrix
 
 %%  Compute moments
@@ -82,18 +82,23 @@ covMatrix_elements_y = Jy*Vy_unc*Jy';
 %     var_x2 = var_x2 + contribx2;
 % end
 %  
-J_ex_sq = [S(2,2) S(1,1) -2*S(1,2)];
-J_ey_sq = [S(4,4) S(3,3) -2*S(3,4)];
-
-ex_sq_var = J_ex_sq*covMatrix_elements_x*J_ex_sq';
-ey_sq_var = J_ey_sq*covMatrix_elements_y*J_ey_sq';
 
 ex = sqrt(S(1,1)*S(2,2)-S(1,2)^2);
 ey = sqrt(S(3,3)*S(4,4)-S(3,4)^2);
-ex_unc = sqrt(ex_sq_var)/(2*ex);
-ey_unc = sqrt(ey_sq_var)/(2*ey);
 
+% Method 1
+J_ex_sq = [S(2,2) S(1,1) -2*S(1,2)];
+J_ey_sq = [S(4,4) S(3,3) -2*S(3,4)];
 
+ex_sq_unc = sqrt(J_ex_sq*covMatrix_elements_x*J_ex_sq');
+ey_sq_unc = sqrt(J_ey_sq*covMatrix_elements_y*J_ey_sq');
+
+ex_unc_m1 = ex_sq_unc/(2*ex);
+ey_unc = ey_sq_unc/(2*ey);
+
+% Method 2
+J_ex = [0.5*S(2,2)/ex 0.5*S(1,1)/ex -S(1,2)/ex];
+ex_unc_m2 = sqrt(J_ex*covMatrix_elements_x*J_ex');
 
 
 %% Interpolate vertex values from midpoint values
@@ -258,6 +263,119 @@ end
 covMatrix_elements_xy = Jxy*V_unc_cen_re*Jxy';
 
 
+%% Uncertainties on intrinsic emittances
+
+covMatrix_elements_combined = blkdiag(covMatrix_elements_x,covMatrix_elements_y,covMatrix_elements_xy); % order: <x^2>,<x'^2>,<xx'>,<y^2>,<y'^2>,<yy'>,<xy>,<x'y'>,<xy'>,<x'y> 
+
+xx = S(1,1);
+xpxp = S(2,2);
+xxp = S(1,2);
+yy = S(3,3);
+ypyp = S(4,4);
+yyp = S(3,4);
+xy = S(1,3);
+xpyp = S(2,4);
+xyp = S(1,4);
+xpy = S(2,3);
+
+conveniencefun = sqrt((2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp)^2 ...
+-16*(xyp^2*xpy^2 - 2*xy*xyp*xpy*xpyp + xy^2*xpyp^2 - xyp^2*xpxp*yy + 2*xxp*xyp*xpyp*yy - xx*xpyp^2*yy ... 
++ 2*xy*xyp*xpxp*yyp - 2*xxp*xyp*xpy*yyp - 2*xxp*xy*xpyp*yyp + 2*xx*xpy*xpyp*yyp + xxp^2*yyp^2 - xx*xpxp*yyp^2 ...
+- xy^2*xpxp*ypyp + 2*xxp*xy*xpy*ypyp - xx*xpy^2*ypyp - xxp^2*yy*ypyp + xx*xpxp*yy*ypyp));
+
+denominator_de1 = 4*sqrt(-2*xxp^2 + 2*xx*xpxp - 4*xyp*xpy + 4*xy*xpyp - 2*yyp^2 + 2*yy*ypyp + conveniencefun);
+denominator_de2 = 4*sqrt(-2*xxp^2 + 2*xx*xpxp - 4*xyp*xpy + 4*xy*xpyp - 2*yyp^2 + 2*yy*ypyp - conveniencefun);
+
+de1_dxx = (2*xpxp + (-4*xpxp*(2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp) ...
+-16*(-xpyp^2*yy + 2*xpy*xpyp*yyp - xpxp*yyp^2 - xpy^2*ypyp + xpxp*yy*ypyp)) / (2*conveniencefun)) ...
+/ denominator_de1;
+
+de2_dxx = (2*xpxp - (-4*xpxp*(2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp) ...
+-16*(-xpyp^2*yy + 2*xpy*xpyp*yyp - xpxp*yyp^2 - xpy^2*ypyp + xpxp*yy*ypyp)) / (2*conveniencefun)) ...
+/ denominator_de2;
+
+de1_dxpxp = (2*xx + (-4*xx*(2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp) ...
+-16*(-xyp^2*yy + 2*xy*xyp*yyp - xx*yyp^2 - xy^2*ypyp + xx*yy*ypyp)) / (2*conveniencefun)) ...
+/ denominator_de1;
+
+de2_dxpxp = (2*xx - (-4*xx*(2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp) ...
+-16*(-xyp^2*yy + 2*xy*xyp*yyp - xx*yyp^2 - xy^2*ypyp + xx*yy*ypyp)) / (2*conveniencefun)) ...
+/ denominator_de2;
+
+de1_dxxp = (-4*xxp + (8*xxp*(2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp) ...
+- 16*(2*xyp*xpyp*yy - 2*xyp*xpy*yyp - 2*xy*xpyp*yyp + 2*xxp*yyp^2 + 2*xy*xpy*ypyp - 2*xxp*yy*ypyp)) / (2*conveniencefun)) ...
+/ denominator_de1;
+
+de2_dxxp = (-4*xxp - (8*xxp*(2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp) ...
+- 16*(2*xyp*xpyp*yy - 2*xyp*xpy*yyp - 2*xy*xpyp*yyp + 2*xxp*yyp^2 + 2*xy*xpy*ypyp - 2*xxp*yy*ypyp)) / (2*conveniencefun)) ...
+/ denominator_de2;
+
+de1_dyy = (2*ypyp + (-16*(-xyp^2*xpxp + 2*xxp*xyp*xpyp - xx*xpyp^2 - xxp^2*ypyp + xx*xpxp*ypyp) ...
+- 4*ypyp*(2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp)) / (2*conveniencefun)) ...
+/ denominator_de1;
+
+de2_dyy = (2*ypyp - (-16*(-xyp^2*xpxp + 2*xxp*xyp*xpyp - xx*xpyp^2 - xxp^2*ypyp + xx*xpxp*ypyp) ...
+- 4*ypyp*(2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp)) / (2*conveniencefun)) ...
+/ denominator_de2;
+
+de1_dypyp = (2*yy + (-16*(-xy^2*xpxp + 2*xxp*xy*xpy - xx*xpy^2 - xxp^2*yy + xx*xpxp*yy) ...
+- 4*yy*(2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp)) / (2*conveniencefun)) ...
+/ denominator_de1;
+
+de2_dypyp = (2*yy - (-16*(-xy^2*xpxp + 2*xxp*xy*xpy - xx*xpy^2 - xxp^2*yy + xx*xpxp*yy) ...
+- 4*yy*(2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp)) / (2*conveniencefun)) ...
+/ denominator_de2;
+
+de1_dyyp = (-4*yyp + (-16*(2*xy*xyp*xpxp - 2*xxp*xyp*xpy - 2*xxp*xy*xpyp + 2*xx*xpy*xpyp + 2*xxp^2*yyp - 2*xx*xpxp*yyp) ...
++ 8*yyp*(2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp)) / (2*conveniencefun)) ...
+/ denominator_de1;
+
+de2_dyyp = (-4*yyp - (-16*(2*xy*xyp*xpxp - 2*xxp*xyp*xpy - 2*xxp*xy*xpyp + 2*xx*xpy*xpyp + 2*xxp^2*yyp - 2*xx*xpxp*yyp) ...
++ 8*yyp*(2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp)) / (2*conveniencefun)) ...
+/ denominator_de2;
+
+de1_dxy = (4*xpyp + (-16*(-2*xyp*xpy*xpyp + 2*xy*xpyp^2 + 2*xyp*xpxp*yyp - 2*xxp*xpyp*yyp - 2*xy*xpxp*ypyp + 2*xxp*xpy*ypyp) ...
+- 8*xpyp*(2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp)) / (2*conveniencefun)) ...
+/ denominator_de1;
+
+de2_dxy = (4*xpyp - (-16*(-2*xyp*xpy*xpyp + 2*xy*xpyp^2 + 2*xyp*xpxp*yyp - 2*xxp*xpyp*yyp - 2*xy*xpxp*ypyp + 2*xxp*xpy*ypyp) ...
+- 8*xpyp*(2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp)) / (2*conveniencefun)) ...
+/ denominator_de2;
+
+de1_dxpyp = (4*xy + (-16*(-2*xy*xyp*xpy + 2*xy^2*xpyp + 2*xxp*xyp*yy - 2*xx*xpyp*yy - 2*xxp*xy*yyp + 2*xx*xpy*yyp) ...
+- 8*xy*(2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp)) / (2*conveniencefun)) ...
+/ denominator_de1;
+
+de2_dxpyp = (4*xy - (-16*(-2*xy*xyp*xpy + 2*xy^2*xpyp + 2*xxp*xyp*yy - 2*xx*xpyp*yy - 2*xxp*xy*yyp + 2*xx*xpy*yyp) ...
+- 8*xy*(2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp)) / (2*conveniencefun)) ...
+/ denominator_de2;
+
+de1_dxyp = (-4*xpy + (-16*(2*xyp*xpy^2 - 2*xy*xpy*xpyp - 2*xyp*xpxp*yy + 2*xxp*xpyp*yy + 2*xy*xpxp*yyp - 2*xxp*xpy*yyp) ...
++ 8*xpy*(2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp)) / (2*conveniencefun)) ...
+/ denominator_de1;
+
+de2_dxyp = (-4*xpy - (-16*(2*xyp*xpy^2 - 2*xy*xpy*xpyp - 2*xyp*xpxp*yy + 2*xxp*xpyp*yy + 2*xy*xpxp*yyp - 2*xxp*xpy*yyp) ...
++ 8*xpy*(2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp)) / (2*conveniencefun)) ...
+/ denominator_de2;
+
+de1_dxpy = (-4*xyp + (-16*(2*xyp^2*xpy - 2*xy*xyp*xpyp - 2*xxp*xyp*yyp + 2*xx*xpyp*yyp + 2*xxp*xy*ypyp - 2*xx*xpy*ypyp) ...
++ 8*xyp*(2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp))/ (2*conveniencefun)) ...
+/ denominator_de1;
+
+de2_dxpy = (-4*xyp - (-16*(2*xyp^2*xpy - 2*xy*xyp*xpyp - 2*xxp*xyp*yyp + 2*xx*xpyp*yyp + 2*xxp*xy*ypyp - 2*xx*xpy*ypyp) ...
++ 8*xyp*(2*xxp^2 - 2*xx*xpxp + 4*xyp*xpy - 4*xy*xpyp + 2*yyp^2 - 2*yy*ypyp))/ (2*conveniencefun)) ...
+/ denominator_de2;
+
+Jemittance = [de1_dxx de1_dxpxp de1_dxxp de1_dyy de1_dypyp de1_dyyp de1_dxy de1_dxpyp de1_dxyp de1_dxpy; ...
+    de2_dxx de2_dxpxp de2_dxxp de2_dyy de2_dypyp de2_dyyp de2_dxy de2_dxpyp de2_dxyp de2_dxpy];
+
+covMatrix_e1_e2 = Jemittance*covMatrix_elements_combined*Jemittance';
+
+[ex,ey,e1,e2]=Emittance_2D_4D(S);
+
+J_e4D = [e2 e1];
+
+unc_e4D = sqrt(J_e4D*covMatrix_e1_e2*J_e4D');
 
 %% Struct with all information of analysis
 info.target='TEM';
