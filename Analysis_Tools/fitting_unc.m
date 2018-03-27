@@ -28,10 +28,11 @@ ystart = mean(y(1:4));
 yend = mean(y(end-3:end));
 
 gradinitguess = (yend-ystart)/(xend-xstart);
+baseinitguess = ystart-gradinitguess*xstart;
 
 %% Fit a double erf function
 modelFunerf = @(p,x) p(5)+p(4)*x+ p(3).*(-erf((x-p(1)+ barwidth/2)/(sqrt(2)*driftLength*p(2)))+erf((x-p(1)-barwidth/2)/(sqrt(2)*driftLength*p(2))));
-startingVals = [xminval,sqrt(sigma_initguess),max(y),gradinitguess,0]; % initial guess gfit, change if necessary.
+startingVals = [xminval,sqrt(sigma_initguess),max(y),gradinitguess,baseinitguess]; % initial guess gfit, change if necessary.
 
 [erfcoefs,R,J,covx,MSE,ErrorModelInfo] = nlinfit(x, y, modelFunerf, startingVals); % fit
 % covx = covx(1:3,1:3);
@@ -47,7 +48,7 @@ intx = erfcoefs(5)+erfcoefs(4)*x0;
 J = [...
     1 0 0 0 0; ...
     0 1 0 0 0; ...
-    erfcoef(4) 0 0 erfcoef(1) 1] ;
+    erfcoefs(4) 0 0 erfcoefs(1) 1] ;
 covx = J*covx*J';
 
 

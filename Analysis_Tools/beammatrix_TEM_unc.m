@@ -86,20 +86,10 @@ covMatrix_elements_y = Jy*Vy_unc*Jy';
 ex = sqrt(S(1,1)*S(2,2)-S(1,2)^2);
 ey = sqrt(S(3,3)*S(4,4)-S(3,4)^2);
 
-% Method 1
-J_ex_sq = [S(2,2) S(1,1) -2*S(1,2)];
-J_ey_sq = [S(4,4) S(3,3) -2*S(3,4)];
-
-ex_sq_unc = sqrt(J_ex_sq*covMatrix_elements_x*J_ex_sq');
-ey_sq_unc = sqrt(J_ey_sq*covMatrix_elements_y*J_ey_sq');
-
-ex_unc_m1 = ex_sq_unc/(2*ex);
-ey_unc = ey_sq_unc/(2*ey);
-
-% Method 2
 J_ex = [0.5*S(2,2)/ex 0.5*S(1,1)/ex -S(1,2)/ex];
-ex_unc_m2 = sqrt(J_ex*covMatrix_elements_x*J_ex');
-
+J_ey = [0.5*S(2,2)/ey 0.5*S(1,1)/ey -S(1,2)/ey];
+ex_unc = sqrt(J_ex*covMatrix_elements_x*J_ex');
+ey_unc = sqrt(J_ey*covMatrix_elements_y*J_ey');
 
 %% Interpolate vertex values from midpoint values
 
