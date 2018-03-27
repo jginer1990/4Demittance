@@ -87,7 +87,7 @@ ex = sqrt(S(1,1)*S(2,2)-S(1,2)^2);
 ey = sqrt(S(3,3)*S(4,4)-S(3,4)^2);
 
 J_ex = [0.5*S(2,2)/ex 0.5*S(1,1)/ex -S(1,2)/ex];
-J_ey = [0.5*S(2,2)/ey 0.5*S(1,1)/ey -S(1,2)/ey];
+J_ey = [0.5*S(4,4)/ey 0.5*S(3,3)/ey -S(3,4)/ey];
 ex_unc = sqrt(J_ex*covMatrix_elements_x*J_ex');
 ey_unc = sqrt(J_ey*covMatrix_elements_y*J_ey');
 
