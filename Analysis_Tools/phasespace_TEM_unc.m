@@ -12,7 +12,7 @@ xb=zeros(length(locsy)-1,length(locsx)); sx=xb; intx=xb; ybc=xb; intx_unc=xb;
 for j=1:length(locsy)-1; % Loop over y
     intenx = sum(rhon(locsy(j):locsy(j+1),:)); % Select intensity values between two horizontal bars
     f = figure;
-    figname = (['locsy = ' num2str(locsy(j))]);
+    figname = (['locsy = ' num2str((locsy(j)+locsy(j+1))/2)]);
     f.Name = figname;
     %% Fit erf in x
     for i=1:length(locsx); % Loop over x
@@ -28,10 +28,10 @@ for j=1:length(locsy)-1; % Loop over y
         if flag == 0
             Ixroi = sum(rhon(regiony,regionx),1);
             try
-                [sx(j,i), xb(j,i), intx(j,i), covx{j,i}] = fitting_unc(regionx, Ixroi, barwidth_x_pix, mask_prop.driftLength,analysis); % Fit erf of region between two peaks
+                [sx(j,i), xb(j,i), intx(j,i), covx{j,i}] = fitting_unc(regionx, Ixroi, barwidth_x_pix, mask_prop.driftLength,analysis,Locsx(j,i)); % Fit erf of region between two peaks
             catch
                 Ixroi = sgolayfilt(Ixroi,7,21);
-                [sx(j,i), xb(j,i), intx(j,i), covx{j,i}] = fitting_unc(regionx, Ixroi, barwidth_x_pix, mask_prop.driftLength,analysis); % Fit erf of region between two peaks
+                [sx(j,i), xb(j,i), intx(j,i), covx{j,i}] = fitting_unc(regionx, Ixroi, barwidth_x_pix, mask_prop.driftLength,analysis,Locsx(j,i)); % Fit erf of region between two peaks
             end
         end
     end
@@ -46,7 +46,7 @@ for j=1:length(locsx)-1; % Loop over x
     temp = rhon(:,locsx(j):locsx(j+1));
     inteny = sum(temp,2);
     f = figure;
-    figname = (['locsx = ' num2str(locsx(j))]);
+    figname = (['locsx = ' num2str((locsx(j)+locsx(j+1))/2)]);
     f.Name = figname;
     
     %% Fit erf in y
@@ -63,10 +63,10 @@ for j=1:length(locsx)-1; % Loop over x
         if flag == 0
             Iyroi = sum(rhon(regiony,regionx),2);
             try
-                [sy(i,j), yb(i,j), inty(i,j), covy{i,j}] = fitting_unc(regiony, Iyroi', barwidth_y_pix, mask_prop.driftLength,analysis); % Fit erf of region between two peaks.
+                [sy(i,j), yb(i,j), inty(i,j), covy{i,j}] = fitting_unc(regiony, Iyroi', barwidth_y_pix, mask_prop.driftLength,analysis,Locsy(i,j)); % Fit erf of region between two peaks.
             catch
                 Iyroi = sgolayfilt(Iyroi,7,21);
-                [sy(i,j), yb(i,j), inty(i,j), covy{i,j}] = fitting_unc(regiony, Iyroi', barwidth_y_pix, mask_prop.driftLength,analysis); % Fit erf of region between two peaks.
+                [sy(i,j), yb(i,j), inty(i,j), covy{i,j}] = fitting_unc(regiony, Iyroi', barwidth_y_pix, mask_prop.driftLength,analysis,Locsy(i,j)); % Fit erf of region between two peaks.
             end
         end
     end

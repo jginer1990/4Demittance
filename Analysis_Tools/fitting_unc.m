@@ -1,4 +1,4 @@
-function [sigma,x0,intx,covx] = fitting_unc(x,y,barwidth,driftLength,analysis)
+function [sigma,x0,intx,covx] = fitting_unc(x,y,barwidth,driftLength,analysis,divline)
 
 if(isfield(analysis,'sigma_initguess'))
     sigma_initguess = analysis.sigma_initguess;
@@ -31,6 +31,9 @@ gradinitguess = (yend-ystart)/(xend-xstart);
 baseinitguess = ystart-gradinitguess*xstart;
 
 %% Fit a double erf function
+
+warning('') % Clear last warning message
+
 modelFunerf = @(p,x) p(5)+p(4)*x+ p(3).*(-erf((x-p(1)+ barwidth/2)/(sqrt(2)*driftLength*p(2)))+erf((x-p(1)-barwidth/2)/(sqrt(2)*driftLength*p(2))));
 startingVals = [xminval,sqrt(sigma_initguess),max(y),gradinitguess,baseinitguess]; % initial guess gfit, change if necessary.
 
@@ -54,13 +57,16 @@ covx = J*covx*J';
 
 %% Sanity cuts
 
-if (x0<min(x) | x0>max(x) | driftLength*sigma> max(x)-min(x)) | intx<0
-    x0=xminval;
-    intx=gradinitguess*xminval+baseinitguess;
+[warnMsg, warnId] = lastwarn;
+
+if (x0<min(x) | x0>max(x) | driftLength*sigma> max(x)-min(x)) | intx<0 | ~isempty(warnMsg);
+    x0=divline;
+    intx=gradinitguess*x0+baseinitguess;
     sigma=0;
+    covx = zeros(size(covx));
     
     if (x0<min(x) | x0>max(x)) | intx<0
-        x0=0;
+        x0=divline;
         intx=0;
     end
 end
