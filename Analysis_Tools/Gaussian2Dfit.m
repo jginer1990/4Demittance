@@ -51,18 +51,18 @@ heighty=max(lineouty);
 
 if imgflag
     figure(889); clf
-    subplot(131); imagesc(X+colmin-1,Y+rowmin-1,image); title('ROI original'); set(gca,'ydir','normal')
-    subplot(132); imagesc(X,Y,rotimg); title('ROI rotated'); set(gca,'ydir','normal')
+    subplot(1,3,1); imagesc(X+colmin-1,Y+rowmin-1,image); title('ROI original'); set(gca,'ydir','normal')
+    subplot(1,3,2); imagesc(X,Y,rotimg); title('ROI rotated'); set(gca,'ydir','normal')
     
     t=0:20:360;
     a1=xrms*cosd(t); a2=yrms*sind(t);
     xellipse=ellipse(1)+a1*cosd(phi)+a2*sind(phi);
     yellipse=ellipse(2)-a1*sind(phi)+a2*cosd(phi);
-    subplot(131); hold on; plot(xellipse,yellipse,'g-'); plot(ellipse(1),ellipse(2),'g+')
+    subplot(1,3,1); hold on; plot(xellipse,yellipse,'g-'); plot(ellipse(1),ellipse(2),'g+')
     plot(CenterIm(1),CenterIm(2),'kx') %center image around which it rotates
     
     a1=center_x+xrms*cosd(t); a2=center_y+yrms*sind(t);
-    subplot(132); hold on; plot(a1,a2,'g-'); plot(center_x,center_y,'g+')
+    subplot(1,3,2); hold on; plot(a1,a2,'g-'); plot(center_x,center_y,'g+')
     plot(CenterRot(1),CenterRot(2),'kx') %center image around which it rotates
     drawnow
 end
@@ -78,11 +78,13 @@ if isequal(lb,ub)
 end
 options = optimset('Display','off');
 
+ub=[length(X),length(X),heightx+1,2*heightx+1];
 [x,resnorm,~,exitflag,output] = lsqcurvefit(F,x0,X,lineoutx,lb,ub,options);
+ub=[length(Y),length(Y),heighty+1,2*heighty+1];
 [y,resnorm,~,exitflag,output] = lsqcurvefit(F,y0,Y,lineouty,lb,ub,options);
 
 if imgflag
-    figure(889); subplot(133)
+    figure(889); subplot(1,3,3)
     scatter(X,lineoutx,'MarkerEdgeColor','b');
     hold on;
     scatter(Y,lineouty,'MarkerEdgeColor','g');

@@ -31,14 +31,14 @@ if locsy(1)<1; locsy(1)=[]; end;
 if locsy(end)>length(inteny); locsy(end)=[]; end;
 
 
-figure(9); clf
-subplot(211); plot(1:length(intenx),intenx,'g-',1:length(intenxsmooth),intenxsmooth,'b-'); xlabel('x[px]'); ylabel('Projected intensity');
+figure(92); clf
+subplot(2,1,1); plot(1:length(intenx),intenx,'g-',1:length(intenxsmooth),intenxsmooth,'b-'); xlabel('x[px]'); ylabel('Projected intensity');
 hold on; plot(locspeaksx,peaksx,'r^',locsx,zeros(size(locsx)),'rv'); hold on; plot([1 length(intenxsmooth)], analysis.minpeakheight_x*[1 1],'r-'); hold off
-subplot(212); plot(1:length(inteny),inteny,'g-',1:length(intenysmooth),intenysmooth,'b-'); xlabel('y[px]'); ylabel('Projected intensity');
+subplot(2,1,2); plot(1:length(inteny),inteny,'g-',1:length(intenysmooth),intenysmooth,'b-'); xlabel('y[px]'); ylabel('Projected intensity');
 hold on; plot(locspeaksy,peaksy,'r^',locsy,zeros(size(locsy)),'rv'); hold on; plot([1 length(intenysmooth)], analysis.minpeakheight_y*[1 1],'r-'); hold off
     
 %% Plot divided screen image
-figure(2)
+figure(93)
 set(gcf,'Name','Screen sheared image')
 imagesc(Asheared); axis('xy')
 siz = size(Asheared);

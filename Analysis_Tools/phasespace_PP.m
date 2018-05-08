@@ -4,8 +4,6 @@ function [S,info] = phasespace_PP(rhon,X,Y,Xn,Yn,X0px,Y0px,S1,S2,mask_prop,locsx
 
 %% Determine beamlets centroids and rms ellipse parameters
 
-funexp2D=@(x,y,mux,muy,sxx,syy,sxy)...
-    1/(2*pi*sqrt(sxx*syy-sxy^2))*exp(-1/(2*(1-sxy^2/sxx/syy))*((x-mux).^2/sxx+(y-muy).^2/syy-2*sxy/sxx/syy*(x-mux).*(y-muy)));
 
 xb = zeros(length(locsy)-1,length(locsx)-1);
 yb=xb; sx=xb; sy=xb; sxy=xb; int=xb;
@@ -22,8 +20,10 @@ for i=1:length(locsy)-1
         mask=zeros(size(rhon));
         for ii=1:size(Xroi,1)
             for jj=1:size(Xroi,2)
-                Iroi(ii,jj) = rhon(Yroi(ii,jj),Xroi(ii,jj));
-                mask(Yroi(ii,jj),Xroi(ii,jj)) = 1;
+                if Xroi(ii,jj)>0 & Xroi(ii,jj)<=size(rhon,2) & Yroi(ii,jj)>0 & Yroi(ii,jj)<=size(rhon,1)
+                    Iroi(ii,jj) = rhon(Yroi(ii,jj),Xroi(ii,jj));
+                    mask(Yroi(ii,jj),Xroi(ii,jj)) = 1;
+                end
             end
         end
         
@@ -52,7 +52,13 @@ for i=1:length(locsy)-1
     end
 end
 
-figure(99); hold on; plot(xb,yb,'rx');
+% figure(99); hold on; plot(xb,yb,'rx');
+figure(99); hold on;
+for i=1:numel(xb)
+    if ~isnan(int(i)) & int(i)>0
+        plot_ellipse_on_density(xb(i),yb(i),sx(i),sy(i),sxy(i));
+    end
+end
 
 
 
@@ -60,11 +66,12 @@ figure(99); hold on; plot(xb,yb,'rx');
 %% Plot intensities
 
 figure(199); clf
-if false
+if true
     imagesc(rhon); set(gca,'Xdir','Normal','Ydir','Normal'); hold on;
     for ii=1:numel(int)
         plot3(xb(ii)*[1 1],yb(ii)*[1 1],[0 int(ii)],'r-');
     end
+    zlim([0 max(int(:))]);
 else
     h1=surf(X,Y,rhon); set(h1, 'edgecolor','none'); hold on
     intfit=zeros(size(rhon));
@@ -74,8 +81,9 @@ else
         end
     end
     h2= surf(X,Y,intfit); set(h2, 'edgecolor','r', 'facecolor','none')
+    zlim([0 max(intfit(:))]);
 end
-view(-30,45); zlim([0 max(intfit(:))]); xlim([min(locsx(:)) max(locsx(:))]); ylim([min(locsy(:)) max(locsy(:))]); 
+view(-30,45); xlim([min(locsx(:)) max(locsx(:))]); ylim([min(locsy(:)) max(locsy(:))]); 
 xlabel('x [px]'); ylabel('y [px]'); zlabel('intensity')
 
 

@@ -27,6 +27,6 @@ function [A_cropped,Acrop0] = crop(A,center,rx,ry)
     A_cropped=Acrop-mean(BGel);
     A_cropped(A_cropped<0)=0; 
     figure(3); clf; imagesc(A_cropped); set(gca,'YDir','normal')
-
+    daspect([1 1 1])
 end
 

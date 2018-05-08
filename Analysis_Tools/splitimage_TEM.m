@@ -17,11 +17,25 @@ inteny = inteny/max(inteny);
 
 %% Determine trough locations
 
-
+% Modification minimum detection (Jorge 02/16/2018)
 intenxsmooth = sgolayfilt(intenx,7,sp);
 intenysmooth = sgolayfilt(inteny,7,sp);
-[minsx, locsx]= findpeaks(-intenxsmooth, 'minpeakdistance', analysis.minpeakdistance,'minpeakheight', analysis.maxtroughheight_x);
-[minsy, locsy]= findpeaks(-intenysmooth', 'minpeakdistance', analysis.minpeakdistance,'minpeakheight', analysis.maxtroughheight_y);
+[maxsx, locsx]= findpeaks(intenxsmooth, 'minpeakdistance', analysis.minpeakdistance,'minpeakheight', 0.05);
+[maxsy, locsy]= findpeaks(intenysmooth', 'minpeakdistance', analysis.minpeakdistance,'minpeakheight', 0.05);
+fun=@(p,x) p(3).*exp(-1/2*(x-p(1)).^2./p(2).^2) ;
+parx=nlinfit(locsx,maxsx,fun,[mean(locsx),std(locsx),1]);
+pary=nlinfit(locsy,maxsy,fun,[mean(locsy),std(locsy),1]);
+intenxsmooth2=intenxsmooth./fun(parx,1:length(intenxsmooth));
+intenysmooth2=intenysmooth'./fun(pary,1:length(intenysmooth));
+[minsx, locsx]= findpeaks(-intenxsmooth2, 'minpeakdistance', analysis.minpeakdistance,'minpeakheight', analysis.maxtroughheight_x);
+[minsy, locsy]= findpeaks(-intenysmooth2, 'minpeakdistance', analysis.minpeakdistance,'minpeakheight', analysis.maxtroughheight_y);
+minsx=-intenxsmooth(locsx);
+minsy=-intenysmooth(locsy)';
+
+% intenxsmooth = sgolayfilt(intenx,7,sp);
+% intenysmooth = sgolayfilt(inteny,7,sp);
+% [minsx, locsx]= findpeaks(-intenxsmooth, 'minpeakdistance', analysis.minpeakdistance,'minpeakheight', analysis.maxtroughheight_x);
+% [minsy, locsy]= findpeaks(-intenysmooth', 'minpeakdistance', analysis.minpeakdistance,'minpeakheight', analysis.maxtroughheight_y);
 
 idx = zeros(size(minsx,2),1);
 idy = zeros(size(minsy,2),1);
@@ -57,12 +71,16 @@ locsx(~idx) = [];
 minsy(~idy) = [];
 locsy(~idy) = [];
 
+% figure(92); clf
+% subplot(211); plot(1:length(intenx),-intenx,'g-',1:length(intenxsmooth),-intenxsmooth,'b-'); xlabel('x[px]'); ylabel('Projected intensity');
+% hold on; plot(locsx,minsx,'r^'); hold on; plot([1 length(intenxsmooth)], analysis.maxtroughheight_x*[1 1],'r-'); hold off
+% subplot(212); plot(1:length(inteny),-inteny,'g-',1:length(intenysmooth),-intenysmooth,'b-'); xlabel('y[px]'); ylabel('Projected intensity');
+% hold on; plot(locsy,minsy,'r^'); hold on; plot([1 length(intenysmooth)], analysis.maxtroughheight_y*[1 1],'r-'); hold off
 figure(92); clf
-subplot(211); plot(1:length(intenx),-intenx,'g-',1:length(intenxsmooth),-intenxsmooth,'b-'); xlabel('x[px]'); ylabel('Projected intensity');
+subplot(2,1,1); plot(1:length(intenx),-intenx,'g-',1:length(intenxsmooth),-intenxsmooth,'b-',1:length(intenxsmooth2),-intenxsmooth2,'c-'); ylim([-2 0]); xlabel('x[px]'); ylabel('Projected intensity');
 hold on; plot(locsx,minsx,'r^'); hold on; plot([1 length(intenxsmooth)], analysis.maxtroughheight_x*[1 1],'r-'); hold off
-subplot(212); plot(1:length(inteny),-inteny,'g-',1:length(intenysmooth),-intenysmooth,'b-'); xlabel('y[px]'); ylabel('Projected intensity');
+subplot(2,1,2); plot(1:length(inteny),-inteny,'g-',1:length(intenysmooth),-intenysmooth,'b-',1:length(intenysmooth2),-intenysmooth2,'c-'); ylim([-2 0]); xlabel('y[px]'); ylabel('Projected intensity');
 hold on; plot(locsy,minsy,'r^'); hold on; plot([1 length(intenysmooth)], analysis.maxtroughheight_y*[1 1],'r-'); hold off
-
 
 % Plot divided screen image
 figure(93)
@@ -84,5 +102,6 @@ hold off
 if length(minsx)<3 || length(minsy)<3
     error('Not enough troughs in data.')
 end
+drawnow
 end
 
