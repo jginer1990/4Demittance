@@ -1,4 +1,4 @@
-function [S,ex,ey,info] = beammatrix_TEM_unc(xg,yg,xb,yb,xs,ys,xbcen,ybcen,xbc,ybc,xp,yp,intx,inty,sigmaxp,sigmayp,covx_scaled,covy_scaled,mask_prop)
+function [S,ex,ey,info,errors] = beammatrix_TEM_unc(xg,yg,xb,yb,xs,ys,xbcen,ybcen,xbc,ybc,xp,yp,intx,inty,sigmaxp,sigmayp,covx_scaled,covy_scaled,mask_prop)
 %BEAMMATRIX_TEM_UNC computes moments and beam matrix
 
 %%  Compute moments
@@ -402,6 +402,27 @@ info.intxcen=intxcen;
 info.intycen=intycen;
 info.intcen=intcen;
 info.S=S;
+
+
+% Summary of errors
+
+errors.ex = ex_unc;
+errors.ey = ey_unc;
+errors.e1 = sqrt(covMatrix_e1_e2(1,1));
+errors.e2 = sqrt(covMatrix_e1_e2(2,2));
+errors.e4D = unc_e4D;
+
+errors.S = zeros(size(S));
+errors.S(1,1)=sqrt(covMatrix_elements_x(1,1));
+errors.S(2,2)=sqrt(covMatrix_elements_x(2,2));
+errors.S(1,2)=sqrt(covMatrix_elements_x(3,3)); errors.S(2,1)=errors.S(1,2);
+errors.S(3,3)=sqrt(covMatrix_elements_y(1,1));
+errors.S(4,4)=sqrt(covMatrix_elements_y(2,2));
+errors.S(3,4)=sqrt(covMatrix_elements_y(3,3)); errors.S(4,3)=errors.S(3,4);
+errors.S(1,3)=sqrt(covMatrix_elements_xy(1,1)); errors.S(3,1)=errors.S(1,3);
+errors.S(2,4)=sqrt(covMatrix_elements_xy(2,2)); errors.S(4,2)=errors.S(2,4);
+errors.S(1,4)=sqrt(covMatrix_elements_xy(3,3)); errors.S(4,1)=errors.S(1,4);
+errors.S(2,3)=sqrt(covMatrix_elements_xy(4,4)); errors.S(3,2)=errors.S(2,3);
 
 display('*Success')
 

@@ -36,8 +36,10 @@ for ifile=1:length(files)
     imagesc(A);
     BG = mean(mean(A(1:30,1:30))); A=A-BG;
     
-    [A,Acrop0] = crop(A,center,rx,ry);
-
+    if ~exist('angle','var'); angle=0; end
+%     [A,Acrop0] = crop(A,center,rx,ry); 
+    [A,Acrop0] = crop_rotate(A,center,rx,ry,angle); 
+    
     xvec = pxconv*(1:size(A,2));
     yvec = pxconv*(1:size(A,1));
     
@@ -131,44 +133,18 @@ for ifile=1:length(files)
             e1_interp=sorted(2); e2_interp=sorted(1);
         end
 
-        %% Save results
-        savedata=1; %input('*Save results? (0 or 1): ');
-        if savedata
-            aux.file=files(ifile).name;
-            aux.S=S;
-            aux.ex=ex*gamma*beta;
-            aux.ey=ey*gamma*beta;
-            aux.e1=e1*gamma*beta;
-            aux.e2=e2*gamma*beta;
-            aux.S_interp=S_interp;
-            aux.ex_interp=ex_interp*gamma*beta;
-            aux.ey_interp=ey_interp*gamma*beta;
-            aux.e1_interp=e1_interp*gamma*beta;
-            aux.e2_interp=e2_interp*gamma*beta;
-            aux.charge = sum(Acrop0(:));
-            if compute_core
-                aux.ex2Dcore=ex2Dcore*gamma*beta;
-                aux.ey2Dcore=ey2Dcore*gamma*beta;
-                aux.e4Dcore=e4Dcore*(gamma*beta)^2;
-            else
-                aux.ex2Dcore=NaN;
-                aux.ey2Dcore=NaN;
-                aux.e4Dcore=NaN;
-            end
-            results(ifile)= aux;
-            Info(ifile)= info;
-        else
-            aux.file=files(ifile).name;
-            aux.S=NaN(4); aux.ex=NaN; aux.ey=NaN; aux.e1=NaN; aux.e2=NaN;
-            aux.S_interp=NaN(4); aux.ex_interp=NaN; aux.ey_interp=NaN; aux.e1_interp=NaN; aux.e2_interp=NaN;
-            aux.charge=NaN; aux.ex2Dcore=NaN; aux.ey2Dcore=NaN; aux.e4Dcore=NaN;
-            results(ifile)= aux;
-            Info(ifile)= info;
-        end
+    %% Save data and figures
+    savefigures=input('*Save results? (0 or 1): ');
+    if savefigures
+        Save_file_data_figures;
+    end
 
         
     end
     
 end
 
-analysis_emittance; % Plot summary of shot-to-shot emittance results 
+% analysis_emittance; % Plot summary of shot-to-shot emittance results 
+analysis_emittance_v2
+analysis_Smatrix_elements
+analysis_emittance_sigmaxp

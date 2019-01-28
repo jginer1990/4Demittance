@@ -77,5 +77,5 @@ hold on;
 plot(Vn,funlin(par(1),Vn/Vn(roi(end))),'g-');
 e4Dcore=Vn(roi(end))/par(1);
 plot([e4Dcore e4Dcore],[0 1],'k:');
-text(e4Dcore,0,[' (\epsilon^{4D}_{core})^{1/2}=' num2str(sqrt(e4Dcore)/1e-9,'%.1f') ' [nm rad]'],...
+text(e4Dcore,0,[' \epsilon^{4D}_{core} = (' num2str(sqrt(e4Dcore)/1e-9,'%.1f') ' nm rad)^2'],...
     'VerticalAlignment','bottom','HorizontalAlignment','left')

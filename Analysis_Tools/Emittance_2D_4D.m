@@ -16,7 +16,7 @@ J = ...
     0   0   -1   0 ] ;
 TJS = trace( (Sig*J)^2 );
 
-e1 = 1/2 * sqrt( -TJS + sqrt(TJS^2-16*det(Sig)) )
-e2 = 1/2 * sqrt( -TJS - sqrt(TJS^2-16*det(Sig)) )  
+e1 = 1/2 * sqrt( -TJS + sqrt(TJS^2-16*det(Sig)) );
+e2 = 1/2 * sqrt( -TJS - sqrt(TJS^2-16*det(Sig)) );
 
 end

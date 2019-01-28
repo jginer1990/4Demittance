@@ -11,7 +11,7 @@ if false
 end
 
 
-roi=find(int>0);
+roi=find(int>0 & sxp>0);
 if nargin<=4 %default limits and number of points
     Npoints = 250*[1 1];
     lb= [min(x(roi)) min(xp(roi))];

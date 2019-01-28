@@ -6,9 +6,9 @@ function [ex2Dcore,ey2Dcore] = core2Demittance(xg_interp,xp_interp,sigmaxp_inter
 
 % Variant 1: Using correlated x-xp, y-yp
 figure(780); clf
-subplot(121);
+subplot(1,2,1);
 [Int_2Dxxp,X_2Dxxp,Xp_2Dxxp,r0_2Dxxp,S_2Dxxp] = Density_2D(xg_interp,xp_interp,sigmaxp_interp,intx_interp,[200 200]);
-subplot(122);
+subplot(1,2,2);
 [Int_2Dyyp,Y_2Dyyp,Yp_2Dyyp,r0_2Dyyp,S_2Dyyp] = Density_2D(yg_interp,yp_interp,sigmayp_interp,inty_interp,[200 200]); xlabel('y [mm]'); ylabel('yp [mrad]');
 
 
@@ -27,7 +27,7 @@ rx_2D = [X_2Dxxp(:) Xp_2Dxxp(:)]; rx_2D = rx_2D - repmat(r0_2Dxxp,[size(rx_2D,1)
 ry_2D = [Y_2Dyyp(:) Yp_2Dyyp(:)]; ry_2D = ry_2D - repmat(r0_2Dyyp,[size(ry_2D,1),1]);
 
 figure(890); clf;
-subplot(211);
+subplot(2,1,1);
 [ex2Dcore,~,~] = core2D_distr(rx_2D,S_2Dxxp,Int_2Dxxp); xlabel('\epsilon^{2D}_{nx,subset} [m rad]');
-subplot(212);
+subplot(2,1,2);
 [ey2Dcore,~,~] = core2D_distr(ry_2D,S_2Dyyp,Int_2Dyyp); xlabel('\epsilon^{2D}_{ny,subset} [m rad]');

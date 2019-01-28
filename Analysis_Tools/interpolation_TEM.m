@@ -34,16 +34,16 @@ X_interp = min(X(1,:)):1:max(X(1,:));
 Y_interp = min(Y(:,1)):1:max(Y(:,1));
 [X_interp,Y_interp]=meshgrid(X_interp,Y_interp);
 
-index = find(xb(:)~=0 & ybc(:)~=0 & intx(:)~=0);
+index = find(xb(:)~=0 & ybc(:)~=0 & intx(:)~=0); index_s=find(xb(:)~=0 & ybc(:)~=0 & intx(:)~=0 & sigmaxp(:)~=0);
 F= scatteredInterpolant(xb(index),ybc(index),intx(index),'linear','none'); intx_interp = F(X_interp,Y_interp); intx_interp(isnan(intx_interp))=0;
 F= scatteredInterpolant(xb(index),ybc(index),xg(index)-x0); xg_interp = F(X_interp,Y_interp);
 F= scatteredInterpolant(xb(index),ybc(index),xp(index)-xp0,'linear','none'); xp_interp = F(X_interp,Y_interp); xp_interp(isnan(xp_interp))=0;
-F= scatteredInterpolant(xb(index),ybc(index),sigmaxp(index),'linear','none'); sigmaxp_interp = F(X_interp,Y_interp); sigmaxp_interp(isnan(sigmaxp_interp))=1;
-index = find(xbc(:)~=0 & yb(:)~=0 & inty(:)~=0);
+F= scatteredInterpolant(xb(index_s),ybc(index_s),sigmaxp(index_s),'linear','none'); sigmaxp_interp = F(X_interp,Y_interp); sigmaxp_interp(isnan(sigmaxp_interp))=1;
+index = find(xbc(:)~=0 & yb(:)~=0 & inty(:)~=0); index_s=find(xbc(:)~=0 & yb(:)~=0 & inty(:)~=0 & sigmayp(:)~=0);
 F= scatteredInterpolant(xbc(index),yb(index),inty(index),'linear','none'); inty_interp = F(X_interp,Y_interp); inty_interp(isnan(inty_interp))=0;
 F= scatteredInterpolant(xbc(index),yb(index),yg(index)-y0); yg_interp = F(X_interp,Y_interp);
 F= scatteredInterpolant(xbc(index),yb(index),yp(index)-yp0,'linear','none'); yp_interp = F(X_interp,Y_interp); yp_interp(isnan(yp_interp))=0;
-F= scatteredInterpolant(xbc(index),yb(index),sigmayp(index),'linear','none'); sigmayp_interp = F(X_interp,Y_interp); sigmayp_interp(isnan(sigmayp_interp))=1;
+F= scatteredInterpolant(xbc(index_s),yb(index_s),sigmayp(index_s),'linear','none'); sigmayp_interp = F(X_interp,Y_interp); sigmayp_interp(isnan(sigmayp_interp))=1;
 sigmaxpyp_interp=zeros(size(sigmaxp_interp));
 
 x0_interp = sum(sum((xg_interp) .* intx_interp))/sum(sum(intx_interp));
@@ -114,4 +114,6 @@ info_interp.yp_interp = yp_interp;
 info_interp.sigmaxp_interp = sigmaxp_interp;
 info_interp.sigmayp_interp = sigmayp_interp;
 info_interp.sigmaxpyp_interp = sigmaxpyp_interp;
+info_interp.intx_interp = intx_interp;
+info_interp.inty_interp = inty_interp;
 info_interp.int_interp = sqrt(intx_interp.*inty_interp);
